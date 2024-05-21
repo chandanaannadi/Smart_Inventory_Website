@@ -1,0 +1,174 @@
+/* Ensures that the main dashboard container takes up the full height of the viewport */
+.dashboard {
+    display: flex;
+    height: 100vh;
+    width: 100vw; /* Ensures the container takes up the full width of the viewport */
+    overflow: hidden; /* Prevents scrollbars from appearing */
+  }
+  
+  .sidebar {
+    width: 250px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-right: 1px solid #dee2e6;
+    box-sizing: border-box; /* Ensures padding is included in the total width */
+  }
+  
+  .sidebar-header h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar-nav li {
+    padding: 10px 0;
+    cursor: pointer;
+  }
+  
+  .sidebar-nav .active {
+    font-weight: bold;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto; /* Adds vertical scrolling if content overflows */
+    box-sizing: border-box; /* Ensures padding is included in the total width */
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .header input {
+    width: 400px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .user-info span {
+    margin-left: 15px;
+    cursor: pointer;
+  }
+  
+  .inventory-overview {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+  }
+  
+  .overview-item {
+    flex: 1;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin: 0 10px;
+    text-align: center;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensures padding is included in the total width */
+  }
+  
+  .overview-item h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .overview-item p {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+  
+  .products-section {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensures padding is included in the total width */
+  }
+  
+  .products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .products-header h2 {
+    margin: 0;
+  }
+  
+  .products-header button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .products-header button:nth-child(2) {
+    background-color: #6c757d;
+  }
+  
+  .products-header button:nth-child(3) {
+    background-color: #28a745;
+  }
+  
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .products-table th,
+  .products-table td {
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    text-align: left;
+  }
+  
+  .products-table th {
+    background-color: #f8f9fa;
+  }
+  
+  .in-stock {
+    color: green;
+  }
+  
+  .out-of-stock {
+    color: red;
+  }
+  
+  .low-stock {
+    color: orange;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .pagination button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  

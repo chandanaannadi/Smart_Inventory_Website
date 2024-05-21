@@ -53,7 +53,28 @@ app.post('/register', async (req, res) => {
   }
 });
 
+app.post('/reset-password', async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
+    // Find the user by email
+    const employee = await EmployeeModel.findOne({ email });
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update the employee's password
+    employee.password = hashedPassword;
+    await employee.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
 app.listen(3001, () => {

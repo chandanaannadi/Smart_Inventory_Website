@@ -20,7 +20,7 @@ router.post('/forgot-password', async (req, res) => {
     from: 'anumulajayanthms@gmail.com',
     to: email,
     subject: 'Password Reset',
-    text: 'Click the link to reset your password: http://localhost:5174/reset-password',
+    text: 'Click the link to reset your password: http://localhost:5173/reset-password',
 };
 
   try {

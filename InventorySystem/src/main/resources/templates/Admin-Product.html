@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head th:replace="~{fragments/Head::head}">
+		<body>
+			<script th:replace="~{fragments/Scripts::script5}"></script>
+			<script th:replace="~{fragments/Scripts::script6}"></script>
+			<script th:replace="~{fragments/Scripts::script7}"></script>
+			<script th:replace="~{fragments/Scripts::script1}"></script>
+			<script th:replace="~{fragments/Scripts::script3}"></script>
+
+			<div th:replace="~{fragments/Navbar::admin-navbar}"></div>
+
+			<div class="product-container mt-5">
+				<div class="mx-5">
+					<div class="d-flex justify-content-between align-middle mb-5">
+						<h2 class="m-0">Products</h2>
+						<button type="button" id="add-product-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+							Add New Product
+						</button>
+					</div>
+					<!-- Modal for Add/Edit Product -->
+					<div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="form-heading">Add a new Product</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<form action="/admin/add-product" th:object="${AddProductForm}" method="post" enctype="multipart/form-data">
+									<div class="modal-body">
+										<div class="form-group">
+											<label for="name">Product Name</label>
+											<input type="text" class="form-control" id="name" name="name" placeholder="Enter Product Name" required />
+										</div>
+
+										<div class="form-group">
+											<label for="upc">UPC Number</label>
+											<input type="text" class="form-control" id="upc" name="upc" placeholder="Enter Product UPC Number" required />
+										</div>
+
+										<div class="form-group">
+											<label for="packageId">Package ID</label>
+											<input type="text" class="form-control" id="packageId" name="packageId" placeholder="Enter Package ID" required />
+										</div>
+
+										<div class="form-group">
+											<label for="trackingId">Tracking ID</label>
+											<input type="text" class="form-control" id="trackingId" name="trackingId" placeholder="Enter Tracking ID" required />
+										</div>
+
+										<div class="form-group">
+											<label for="arivalDate">Arrival Date</label>
+											<input type="date" class="form-control" id="arivalDate" name="arivalDate" required />
+										</div>
+
+										<div class="form-group">
+											<label for="quantity">Product Quantity</label>
+											<input type="number" class="form-control" id="quantity" name="quantity" min="0" required />
+										</div>
+
+										<div class="form-group">
+											<label for="availability">In Stock?</label>
+											<input type="checkbox" id="availability" name="availability" value="true" />
+										</div>
+
+										<label for="userId">Owner Username</label>
+										<select class="form-select" name="userId" id="userId" required>
+											<option th:each="user : ${users}" th:value="${user.id}">[(${user.userName})]</option>
+										</select>
+										<input type="text" hidden="hidden" class="form-control" id="productId" name="id" value="" />
+
+										<div class="preview mt-3">
+											<img class="rounded-circle" height="110" width="110" id="file-ip-1-preview" alt="Product image" style="display: none" />
+										</div>
+
+										<label for="file" class="btn btn-dark btn-block btn-lg mt-3" data-mdb-ripple-color="dark">Upload Image</label>
+										<input name="file" type="file" id="file" style="display: none" accept="image/*" onchange="showPreview(event);" required />
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+										<button type="submit" class="btn btn-primary">Save/Update Product</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+
+					<table id="productTable" class="table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th>Product Image</th>
+								<th>Name</th>
+								<th>UPC Number</th>
+								<th>Package Id</th>
+								<th>Tracking Id</th>
+								<th>Quantity</th>
+								<th>Owner Username</th>
+								<th>Arrival Date</th>
+								<th>Availability</th>
+								<th>Status</th>
+								<th>Actions</th>
+								<th style="display: none">Product Id</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="product : ${products}">
+								<td>
+									<img
+										th:src="@{'data:image/jpeg;base64,'+${product.generateBase64Image()}}"
+										alt="Product Image"
+										style="max-width: 100px; max-height: 100px"
+										class="product-image"
+									/>
+								</td>
+								<td th:text="${product.productName}"></td>
+								<td th:text="${product.upc}"></td>
+								<td th:text="${product.packageId}"></td>
+								<td th:text="${product.trackingId}"></td>
+								<td th:text="${product.quantity}"></td>
+								<td th:text="${product.user.userName}"></td>
+								<td th:text="${product.arivalDate}"></td>
+								<td th:text="${product.availability ? 'In Stock' : 'Out Of Stock'}"></td>
+								<td th:text="${product.active}"></td>
+								<td>
+									<button type="button" class="btn btn-primary btn-sm edit-button">Edit</button>
+									<a th:href="@{'/admin/product-status-update?productId=' + ${product.id}}">
+										<button type="button" class="btn btn-danger btn-sm">Active / Disable</button>
+									</a>
+								</td>
+								<td th:text="${product.id}" style="display: none"></td>
+							</tr>
+						</tbody>
+					</table>
+					<br /><br />
+				</div>
+				<input th:value="${success}" disabled hidden="hidden" id="productAdded" />
+				<input th:value="${message}" disabled hidden="hidden" id="message" />
+			</div>
+
+			<div th:replace="~{fragments/Footer::admin-footer}"></div>
+
+			<script>
+				const editButtons = document.querySelectorAll('.edit-button');
+
+				$(document).ready(function () {
+					$('#productTable').DataTable({ order: [] });
+				});
+
+				document.addEventListener('DOMContentLoaded', function () {
+					var productAdded = document.getElementById('productAdded').value;
+					if (productAdded != 'null') {
+						var message = document.getElementById('message').value;
+						if (productAdded === 'true') {
+							swal({
+								title: 'Success!',
+								text: message,
+								icon: 'success',
+								button: 'close!',
+							});
+						} else {
+							swal({
+								title: 'Failure!',
+								text: message,
+								icon: 'failure',
+								button: 'close!',
+							});
+						}
+					}
+				});
+
+				document.getElementById('add-product-btn').addEventListener('click', function () {
+					document.getElementById('form-heading').innerText = 'Add a new Product';
+
+					// Clear all input fields
+					document.getElementById('name').value = '';
+					document.getElementById('upc').value = '';
+					document.getElementById('packageId').value = '';
+					document.getElementById('trackingId').value = '';
+					document.getElementById('quantity').value = '';
+					document.getElementById('arivalDate').value = '';
+					document.getElementById('availability').checked = false;
+					document.getElementById('productId').value = '';
+
+					// Reset the image preview
+					var preview = document.getElementById('file-ip-1-preview');
+					preview.src = '';
+					preview.style.display = 'none';
+
+					// Reset the owner dropdown to the first option (or empty)
+					document.getElementById('userId').selectedIndex = 0;
+
+					// Optionally reset the file input field
+					document.getElementById('file').value = '';
+				});
+
+				editButtons.forEach((button) => {
+					button.addEventListener('click', function () {
+						document.getElementById('form-heading').innerText = 'Edit Product';
+						const row = this.closest('tr');
+
+						document.getElementById('name').value = row.querySelector('td:nth-child(2)').textContent.trim();
+						document.getElementById('upc').value = row.querySelector('td:nth-child(3)').textContent.trim();
+						document.getElementById('packageId').value = row.querySelector('td:nth-child(4)').textContent.trim();
+						document.getElementById('trackingId').value = row.querySelector('td:nth-child(5)').textContent.trim();
+						document.getElementById('quantity').value = row.querySelector('td:nth-child(6)').textContent.trim();
+						document.getElementById('arivalDate').value = row.querySelector('td:nth-child(8)').textContent.trim().split(' ')[0];
+						document.getElementById('availability').checked = row.querySelector('td:nth-child(9)').textContent.trim() === 'In Stock';
+						document.getElementById('productId').value = row.querySelector('td:nth-child(12)').textContent.trim();
+
+						const userText = row.querySelector('td:nth-child(7)').textContent.trim();
+						const select = document.querySelector('#userId');
+						const options = Array.from(select.options);
+						const optionToSelect = options.find((item) => item.text === userText);
+						optionToSelect.selected = true;
+
+						const imageSrc = row.querySelector('.product-image').getAttribute('src');
+						var preview = document.getElementById('file-ip-1-preview');
+						preview.src = imageSrc;
+						preview.style.display = '';
+
+						$('#addProductModal').modal('show');
+					});
+				});
+
+				function showPreview(event) {
+					if (event.target.files.length > 0) {
+						var src = URL.createObjectURL(event.target.files[0]);
+						var preview = document.getElementById('file-ip-1-preview');
+						preview.src = src;
+						preview.style.display = '';
+					}
+				}
+			</script>
+		</body>
+	</head>
+</html>

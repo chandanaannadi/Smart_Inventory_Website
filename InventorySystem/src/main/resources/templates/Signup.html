@@ -5,39 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inventory System</title>
     <link rel="stylesheet" th:href="@{/styles/Login.css}" />
-	<link rel="stylesheet" th:href="@{/styles/Register.css}" />
   </head>
   <body>
-    <div class="register-container">
-      <div class="register-left">
-        <img src="/images/sm.png" alt="Smart Inventory Logo" class="logo" />
-        <h1>SMART INVENTORY</h1>
-      </div>
-      <div class="register-right">
-        <form class="register-form" th:action="@{/signUp}" th:object="${SignUpForm}" method="post" onsubmit="return validateSignUpForm()">
-          <h2>Create an account</h2>
-          <p>Start your free trial.</p>
-          <div class="form-group">
-            <label for="username">Username*</label>
-            <input type="text" id="username" name="userName" placeholder="Enter your username" required />
-          </div>
-          <div class="form-group">
-            <label for="email">Email*</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" required />
-          </div>
-          <div class="form-group">
-            <label for="password">Password*</label>
-            <input type="password" id="password" name="password" placeholder="Create a password" required />
-            <small>Must be at least 8 characters.</small>
-          </div>
-          <div class="form-group">
-            <label for="confirmPassword">Confirm password*</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required />
-          </div>
-          <button type="submit" class="btn btn-primary">Create account</button>
-          <p>Already have an account? <a href="/login">Log in</a></p>
-        </form>
-      </div>
+    <div class="login-container">
+      <h1>Inventory System</h1>
+      <h2>Create Client Account</h2>
+      <form th:action="@{/signUp}" th:object="${SignUpForm}" method="post" onsubmit="return validateSignUpForm()">
+        <!--        <p th:if="${invalidCredentials}" class="error-message">Username or Password is incorrect</p>-->
+        <p th:if="${error}" class="error-message"><span th:text="${message}"></span></p>
+
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="userName" required />
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+
+        <label for="password">Confirm password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required />
+        <br /><br />
+        <button type="submit">Create account</button>
+      </form>
     </div>
   </body>
 </html>

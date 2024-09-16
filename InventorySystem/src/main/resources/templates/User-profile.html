@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head th:replace="~{fragments/Head::head}">
+    <body>
+      <div th:replace="~{fragments/Navbar::navbar}"></div>
+      <script th:replace="~{fragments/Scripts::script1}"></script>
+      <script th:replace="~{fragments/Scripts::script2}"></script>
+
+      <div class="container mt-5">
+        <div class="container mt-5">
+          <h1 class="mb-4">User Profile</h1>
+        </div>
+
+        <hr class="mt-0 mb-4" />
+        <form th:action="@{/update-profile}" th:object="${SignUpForm}" enctype="multipart/form-data" method="POST" class="row">
+          <div class="col-xl-4">
+            <!-- Profile picture card-->
+            <div class="card mb-4 mb-xl-0">
+              <div class="card-header">Profile Picture</div>
+              <div class="card-body text-center">
+                <!-- Profile picture image-->
+
+                <div class="preview">
+                  <img
+                    class="rounded-circle text-center"
+                    height="110"
+                    width="110"
+                    th:src="@{'data:image/jpeg;base64,'+${user.generateBase64Image()}}"
+                    id="file-ip-1-preview"
+                    alt="Profile Picture"
+                  />
+                </div>
+
+                <br />
+                <label for="file" class="btn btn-dark btn-block btn-lg" data-mdb-ripple-color="dark">Upload Image </label>
+                <input name="file" type="file" id="file" style="display: none" accept="image/*" onchange="showPreview(event);" />
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-8">
+            <!-- Account details card-->
+            <div class="card mb-4">
+              <div class="card-header">Account Details</div>
+              <div class="card-body">
+                <p th:if="${error}" class="error-message" th:text="${message}"></p>
+                <p th:if="${success}" class="success-message" th:text="${message}"></p>
+
+                <form>
+                  <!-- Form Group (username)-->
+                  <div class="mb-3">
+                    <label class="small mb-1" for="inputUsername">User name <span class="text-danger">(not able to change)</span> </label>
+                    <input class="form-control" id="inputUsername" readonly="readonly" th:value="${user.userName}" />
+                  </div>
+                  <!-- Form Row-->
+                  <div class="row gx-3 mb-3">
+                    <input class="form-control" id="id" name="id" type="password" placeholder="id" th:value="${user.id}" hidden="hidden" />
+                    <!-- Form Group (first name)-->
+                    <div class="col-md-6">
+                      <label class="small mb-1" for="name">Name</label>
+                      <input class="form-control" id="name" name="name" type="text" th:value="${user.name}" />
+                    </div>
+                    <!-- Form Group (last name)-->
+                    <div class="col-md-6">
+                      <label class="small mb-1" for="phoneNumber">Phone Number</label>
+                      <input class="form-control" id="phoneNumber" name="phoneNumber" type="text" th:value="${user.phoneNumber}" />
+                    </div>
+                  </div>
+
+                  <br />
+                  <!-- Form Row-->
+                  <div class="row gx-3 mb-3">
+                    <!-- Form Group (phone number)-->
+                    <div class="col-md-6">
+                      <label class="small mb-1" for="currentPassword">Current Password</label>
+                      <input class="form-control" id="currentPassword" name="currentPassword" type="password" placeholder="Current Password" />
+                    </div>
+                    <br />
+                    <div class="col-md-6">
+                      <label class="small mb-1" for="newPassword">New Password</label>
+                      <input class="form-control" id="newPassword" name="newPassword" type="password" placeholder="New Password" />
+                    </div>
+                    <!-- Form Group (birthday)-->
+                    <div class="col-md-6">
+                      <label class="small mb-1" for="confirmPassword">Confirm Password</label>
+                      <input class="form-control" id="confirmPassword" type="password" name="confirmPassword" placeholder="Confirm Password" />
+                    </div>
+                  </div>
+                  <!-- Save changes button-->
+                  <button class="btn col-8 offset-2 btn-dark btn-block btn-lg" type="submit">Save changes</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div th:replace="~{fragments/Footer::admin-footer}"></div>
+    </body>
+  </head>
+</html>

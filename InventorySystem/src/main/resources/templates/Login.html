@@ -5,38 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inventory System</title>
     <link rel="stylesheet" th:href="@{/styles/Login.css}" />
-    <link rel="stylesheet" th:href="@{/styles/Register.css}" />
   </head>
   <body>
-    <div class="register-container">
-      <div class="register-left">
-        <img src="/images/sm.png" alt="Smart Inventory Logo" class="logo" />
-        <h1>SMART INVENTORY</h1>
-      </div>
-      <div class="register-right">
-        <h2>Login</h2>
-        <form th:action="@{/login}" th:object="${LoginForm}" method="post" onsubmit="return validateForm()" class="login-form">
-          <p th:if="${invalidCredentials}" class="error-message">Username or Password is incorrect</p>
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required />
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required />
-          </div>
-          <div class="form-group remember-me">
-            <input type="checkbox" id="rememberMe" name="rememberMe" />
-            <label for="rememberMe">Remember Me</label>
-          </div>
-          <button type="submit" class="btn btn-primary">Login</button>
-        </form>
+    <div class="login-container">
+      <h1>Inventory System</h1>
+      <h2>Login</h2>
+      <form th:action="@{/login}" th:object="${LoginForm}" method="post" onsubmit="return validateForm()">
+        <p th:if="${invalidCredentials}" class="error-message">Username or Password is incorrect</p>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
 
-        <div class="sign-up">
-          <p>Forgot password? <a th:href="@{/forgot-password}">Reset password</a></p>
-          <p>Don't have an account? <a th:href="@{/signUp}">Sign up</a></p>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+
+        <div class="remember-me">
+          <input type="checkbox" id="rememberMe" name="rememberMe" />
+          <label for="rememberMe">Remember Me</label>
         </div>
-      </div>
+
+        <button type="submit">Login</button>
+      </form>
+
+	  <div class="sign-up">
+	    <p>Forgot password? <a th:href="@{/forgot-password}">Reset password</a></p>
+	    <p>Don't have account? <a th:href="@{/signUp}">sign up</a></p>
+	  </div>
     </div>
     <script th:src="@{/js/login.js}"></script>
   </body>

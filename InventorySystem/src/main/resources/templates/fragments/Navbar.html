@@ -1,0 +1,118 @@
+<div th:fragment="navbar">
+  <nav class="navbar bg-dark border-bottom navbar-expand-lg bg-body-tertiary p-3">
+    <div class="container-fluid">
+      <a class="navbar-brand" th:href="@{/}">Inventory System</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-lg-0">
+          <li class="nav-item">
+            <!--<a class="nav-link active" aria-current="page" th:href="@{/}">Home</a>-->
+          </li>
+        </ul>
+        <ul class="col-lg-5 col-md-12 col-12 mb-0">
+          <form action="/product-search" th:object="${ProductSearchForm}" method="post" class="">
+            <div class="input-group">
+              <input
+                type="search"
+                name="productName"
+                id="productName"
+                class="form-control"
+                style="width: 35%"
+                placeholder="Search for product here"
+              />
+              <button class="btn primary-background text-white">
+                <i class="fa fa-search" style="color: black"></i>
+              </button>
+            </div>
+          </form>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <!-- Added 'ms-auto' class to move icons to the right -->
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/get-orders}"> My Orders </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/chat}"> Chat </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/logout}"> Logout </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/user-profile}">
+              <i class="fa fa-user" aria-hidden="true"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<div th:fragment="admin-navbar">
+  <nav class="navbar bg-dark border-bottom navbar-expand-lg bg-body-tertiary p-3">
+    <div class="container-fluid">
+      <a class="navbar-brand" th:href="@{/admin/dashboard}">Inventory System - Admin</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+           <!-- <a class="nav-link active" aria-current="page" th:href="@{/admin/dashboard}">Home</a> -->
+          </li>
+        </ul>
+        <ul class="col-lg-5 col-md-12 col-12 mb-0">
+          <form action="/admin/product-search" th:object="${ProductSearchForm}" method="post" class="">
+            <div class="input-group">
+              <input
+                type="search"
+                name="productName"
+                id="productName"
+                class="form-control"
+                style="width: 35%"
+                placeholder="Search for product here"
+              />
+              <button class="btn primary-background text-white">
+                <i class="fa fa-search" style="color: black"></i>
+              </button>
+            </div>
+          </form>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <!-- Added 'ms-auto' class to move icons to the right -->
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/get-active-orders}"> Active Orders </a>
+          </li>
+		  
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/product}"> Products </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/chat}"> Chat </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/logout}"> Logout </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>

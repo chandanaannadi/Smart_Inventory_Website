@@ -15,7 +15,7 @@
 					<div class="d-flex justify-content-between align-middle mb-5">
 						<h2 class="m-0">Products</h2>
 						<button type="button" id="add-product-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-							Add New Product
+							Check In
 						</button>
 					</div>
 					<!-- Modal for Add/Edit Product -->
@@ -124,7 +124,9 @@
 								<td>
 									<button type="button" class="btn btn-primary btn-sm edit-button">Edit</button>
 									<a th:href="@{'/admin/product-status-update?productId=' + ${product.id}}">
-										<button type="button" class="btn btn-danger btn-sm">Active / Disable</button>
+										<button type="button" class="btn btn-sm" th:classappend="${product.active} ? 'btn-danger' : 'btn-success'">
+											<span th:text="${product.active} ? 'Disable' : 'Enable'">Disable</span>
+										</button>
 									</a>
 								</td>
 								<td th:text="${product.id}" style="display: none"></td>
@@ -156,6 +158,8 @@
 								text: message,
 								icon: 'success',
 								button: 'close!',
+							}).then(() => {
+								window.location.href = '/admin/product';
 							});
 						} else {
 							swal({
@@ -163,6 +167,8 @@
 								text: message,
 								icon: 'failure',
 								button: 'close!',
+							}).then(() => {
+								window.location.href = '/admin/product';
 							});
 						}
 					}

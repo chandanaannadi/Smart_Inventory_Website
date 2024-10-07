@@ -82,6 +82,11 @@ public class ProductService {
                 .orElseThrow(() -> new Exception("Invalid user")));
     }
     
+    @SneakyThrows
+    public Order getOrderById(Long id) {
+        return orderRepository.findById(id).orElseThrow(() -> new Exception("Invalid ID"));
+    }
+    
     public List<Order> getActiveOrders(Long warehouseId) {
         List<Order> orders = orderRepository.findByWarehouseIdAndOrderStatusNot(warehouseId, "DELIVERED");
 
@@ -143,6 +148,11 @@ public class ProductService {
     public void deleteOrder(UserDto userDto, DeleteOrderForm deleteOrderForm){
         Order o = orderRepository.findById(deleteOrderForm.getOrderId())
                 .orElseThrow(() -> new Exception("Invalid order id"));
+        
+        Product product = o.getProduct();
+        product.setQuantity(product.getQuantity()+o.getQuantity());
+        productRepository.save(product);
+        
         orderRepository.delete(o);
     }
 

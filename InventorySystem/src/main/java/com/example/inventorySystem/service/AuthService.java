@@ -66,23 +66,10 @@ public class AuthService {
         return null;
     }
 
-    @SuppressWarnings("static-access")
-    public User getUserByRememberMeToken(String rememberMeToken) {
-        return new User().builder()
-                .id(1l)
-                .userName("asjid")
-                .password("password")
-                .rememberMeToken("remembertoken")
-                .sessionToken("sessiontoken")
-                .phone("03044115263")
-                .name("User name")
-                .build();
-    }
-
     @SneakyThrows
     public UserDto login(LoginForm loginForm) {
         User user = userRepository.findByUserName(loginForm.getUsername());
-        if (user == null || !user.getPassword().equals(loginForm.getPassword()))
+        if (user == null || !user.getPassword().equals(loginForm.getPassword()) || !user.getActive())
             throw new AccessDeniedException("Invalid Credentials");
 
         user.setSessionToken(UUID.randomUUID().toString());
@@ -135,6 +122,7 @@ public class AuthService {
                 .password(signUpForm.getPassword())
                 .role("CUSTOMER")
                 .status(Status.ONLINE)
+                .active(Boolean.TRUE)
                 .build());
     }
 
@@ -144,11 +132,13 @@ public class AuthService {
                 .userName(user.getUserName())
                 .name(user.getName())
                 .phoneNumber(user.getPhone())
+                .email(user.getEmail())
                 .sessionToken(user.getSessionToken())
                 .rememberMeToken(user.getRememberMeToken())
                 .image(user.getImage())
                 .role(user.getRole())
                 .status(user.getStatus())
+                .active(user.getActive())
                 .warehouseId(user.getWarehouseId())
                 .warehouseName(user.getWarehouseName())
                 .build();
@@ -169,6 +159,18 @@ public class AuthService {
     }
 
     @SneakyThrows
+    public List<UserDto> getAllActiveUsers(){
+    	List<UserDto> usersList =  new ArrayList<UserDto>();
+    	List<User> users = userRepository.findByRoleAndActive("CUSTOMER", Boolean.TRUE);
+    	if(!users.isEmpty()) {
+    		for(User user: users) {
+    			usersList.add(mapUserDto(user));
+    		}
+    	}
+    	return usersList;
+    }
+    
+    @SneakyThrows
     public List<UserDto> getAllUsers(){
     	List<UserDto> usersList =  new ArrayList<UserDto>();
     	List<User> users = userRepository.findByRole("CUSTOMER");
@@ -178,5 +180,14 @@ public class AuthService {
     		}
     	}
     	return usersList;
+    }
+    
+    @SneakyThrows
+    public void toggleUserActiveStatus(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new Exception("Invalid user"));
+
+        user.setActive(!user.getActive());
+        userRepository.save(user);
     }
 }

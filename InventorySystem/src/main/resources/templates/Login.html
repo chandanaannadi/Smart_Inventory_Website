@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inventory System</title>
-    <link rel="stylesheet" th:href="@{/styles/Login.css}" />
-  </head>
-  <body>
-    <div class="login-container">
-      <h1>Inventory System</h1>
-      <h2>Login</h2>
-      <form th:action="@{/login}" th:object="${LoginForm}" method="post" onsubmit="return validateForm()">
-        <p th:if="${invalidCredentials}" class="error-message">Username or Password is incorrect</p>
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required />
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Inventory System</title>
+		<link rel="stylesheet" th:href="@{/styles/Login.css}" />
+	</head>
+	<body>
+		<div class="login-container">
+			<h1>Inventory System</h1>
+			<h2>Login</h2>
+			<form th:action="@{/login}" th:object="${LoginForm}" method="post" onsubmit="return validateForm()">
+				<p th:if="${invalidCredentials}" class="error-message">Username or Password is incorrect</p>
+				<label for="username">Username:</label>
+				<input type="text" id="username" name="username" required />
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required />
+				<label for="password">Password:</label>
+				<input type="password" id="password" name="password" required />
 
-        <div class="remember-me">
-          <input type="checkbox" id="rememberMe" name="rememberMe" />
-          <label for="rememberMe">Remember Me</label>
-        </div>
+				<div class="remember-me">
+					<input type="checkbox" id="rememberMe" name="rememberMe" />
+					<label for="rememberMe">Remember Me</label>
+				</div>
 
-        <button type="submit">Login</button>
-      </form>
+				<button type="submit">Login</button>
+			</form>
 
-	  <div class="sign-up">
-	    <p>Forgot password? <a th:href="@{/forgot-password}">Reset password</a></p>
-	    <p>Don't have account? <a th:href="@{/signUp}">sign up</a></p>
-	  </div>
-    </div>
-    <script th:src="@{/js/login.js}"></script>
-  </body>
+			<div class="sign-up">
+				<p>Forgot password? <a th:href="@{/forgot-password}">Reset password</a></p>
+				<p>Don't have account? <a th:href="@{/signUp}">sign up</a></p>
+			</div>
+		</div>
+		<script th:src="@{/js/login.js}"></script>
+	</body>
 </html>

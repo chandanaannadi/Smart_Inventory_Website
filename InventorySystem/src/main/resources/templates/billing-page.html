@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head th:replace="~{fragments/Head::head}"></head>
+	<body>
+		<div th:replace="~{fragments/Navbar::navbar}"></div>
+
+		<div class="container my-5">
+			<!-- Current Month Bills Section -->
+			<div class="card shadow-sm border-0 mb-4" style="border-radius: 15px">
+				<div class="card-body p-4">
+					<div class="d-flex justify-content-between align-items-center mb-4">
+						<h2 class="fw-bold mb-0 text-dark">Current Billing Cycle</h2>
+					</div>
+
+					<div th:if="${currentMonthBills.size() > 0}">
+						<div class="row">
+							<div class="col">
+								<div class="accordion" id="currentBillsAccordion">
+									<div th:each="currentBill, iterStat : ${currentMonthBills}" class="card mb-3">
+										<div class="card-header" th:attr="id=${'heading-' + iterStat.index}" style="background-color: #f8f9fa">
+											<h5 class="mb-0">
+												<button
+													class="btn btn-link collapsed text-decoration-none"
+													type="button"
+													data-bs-toggle="collapse"
+													th:attr="data-bs-target=${'#collapse-' + iterStat.index}, aria-controls=${'collapse-' + iterStat.index}"
+													aria-expanded="false"
+												>
+													Billing Period:
+													<strong
+														th:text="${#dates.format(currentBill.billStartDate, 'dd MMM')} + ' - ' + ${#dates.format(currentBill.billEndDate, 'dd MMM')}"
+													></strong>
+													&nbsp;&nbsp;&nbsp;&nbsp; Warehouse Id:
+													<strong th:text="${currentBill.warehouseId}"></strong>
+												</button>
+											</h5>
+										</div>
+
+										<div
+											th:attr="id=${'collapse-' + iterStat.index}, aria-labelledby=${'heading-' + iterStat.index}"
+											class="collapse"
+											data-bs-parent="#currentBillsAccordion"
+										>
+											<div class="card-body">
+												<div class="row">
+													<div class="col-md-6">
+														<p class="mb-2">
+															<span class="text-muted">Due Date:</span>
+															<strong th:text="${#dates.format(currentBill.dueDate, 'dd MMM yyyy')}"></strong>
+														</p>
+														<p class="mb-2">
+															<span class="text-muted">Amount Due:</span> <strong th:text="${currentBill.amountDue + ' $'}"></strong>
+														</p>
+														<p class="mb-2"><span class="text-muted">Paid:</span> <strong th:text="${currentBill.paid ? 'Yes' : 'No'}"></strong></p>
+													</div>
+													<div class="col-md-6 text-end">
+														<th:block th:if="${!currentBill.paid}">
+															<button type="button" class="btn btn-primary" th:onclick="'makePayment(' + ${currentBill.id} + ')'">Pay Now</button>
+														</th:block>
+														<th:block th:if="${currentBill.paid}">
+															<h5 class="text-success fw-bold">Payment Complete</h5>
+														</th:block>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<th:block th:if="${currentMonthBills.size() == 0}">
+						<p class="text-muted">No bills for the current month</p>
+					</th:block>
+				</div>
+			</div>
+
+			<hr class="my-4" />
+
+			<!-- Billing History Section -->
+			<div class="card shadow-sm border-0" style="border-radius: 15px">
+				<div class="card-body p-4">
+					<div class="d-flex justify-content-between align-items-center mb-4">
+						<h2 class="fw-bold mb-0 text-dark">Billing History</h2>
+						<h6 class="mb-0 text-muted"><span th:text="${billingHistory.size()}"></span> records</h6>
+					</div>
+
+					<div class="row">
+						<div th:each="bill : ${billingHistory}" class="col-md-4 mb-4">
+							<div class="card shadow-sm border-0">
+								<div class="card-body">
+									<h5 class="text-primary">Billing Cycle:</h5>
+									<p class="mb-2">
+										<span class="text-danger" th:text="${#dates.format(bill.billStartDate, 'dd MMM yyyy')}"></span> -
+										<span class="text-danger" th:text="${#dates.format(bill.billEndDate, 'dd MMM yyyy')}"></span>
+									</p>
+									<p class="mb-2">
+										<span class="text-muted">Amount Paid:</span>
+										<strong th:text="${bill.paid ? bill.amountDue + ' $' : 'Unpaid'}"></strong>
+									</p>
+									<p class="mb-2">
+										<span class="text-muted">Payment Date:</span>
+										<strong th:text="${bill.paymentDate != null ? #dates.format(bill.paymentDate, 'dd MMM yyyy') : 'N/A'}"></strong>
+									</p>
+									<p class="mb-2">
+										<span class="text-muted">Due Date:</span>
+										<strong th:text="${#dates.format(bill.dueDate, 'dd MMM yyyy')}"></strong>
+									</p>
+									<p class="mb-0">
+										<span class="text-muted">Status:</span>
+										<span th:class="${bill.paid ? 'text-success' : 'text-danger'}" th:text="${bill.paid ? 'Paid' : 'Unpaid'}"></span>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="pt-5">
+						<h6 class="mb-0">
+							<a th:href="@{/}" class="text-body"> <i class="fas fa-long-arrow-alt-left me-2"></i>Back to Dashboard </a>
+						</h6>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div th:replace="~{fragments/Footer::footer}"></div>
+
+		<!-- Scripts -->
+		<script th:replace="~{fragments/Scripts::script1}"></script>
+		<script th:replace="~{fragments/Scripts::script2}"></script>
+		<script th:replace="~{fragments/Scripts::script3}"></script>
+	</body>
+</html>

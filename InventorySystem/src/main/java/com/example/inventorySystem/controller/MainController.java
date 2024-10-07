@@ -1,4 +1,4 @@
-package com.example.inventorySystem.controller;
+\package com.example.inventorySystem.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

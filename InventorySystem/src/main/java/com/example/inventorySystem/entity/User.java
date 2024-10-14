@@ -31,6 +31,7 @@ public class User {
     private String warehouseName;
     @Enumerated(EnumType.STRING)
     private Status status;
+    private Boolean active;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)

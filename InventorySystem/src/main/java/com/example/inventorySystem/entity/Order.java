@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.Base64;
+import java.util.List;
 
 @Entity
 @Data
@@ -36,6 +37,9 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderHistory> orderHistory;
     
     @Lob
     @Basic(fetch = FetchType.LAZY)

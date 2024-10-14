@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 
@@ -46,6 +47,9 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductHistory> productHistory;
 
     public String generateBase64Image() {
         return Base64.encodeBase64String(this.image);

@@ -53,8 +53,8 @@ public class AdminController {
         UserDto userDto = authService.authenticateUser(request, httpSession);
         if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
             return "redirect:/";
-        model.addAttribute("products", productService.adminWarehouseProducts(ProductSearchForm.builder().categoryId(0L).build(), userDto.getId()));
-        model.addAttribute("users", authService.getAllUsers());
+        model.addAttribute("products", productService.adminWarehouseProducts(userDto.getId()));
+        model.addAttribute("users", authService.getAllActiveUsers());
         model.addAttribute("success", "null");
         model.addAttribute("message", "");
 
@@ -72,34 +72,19 @@ public class AdminController {
 
         try {
             productService.addProduct(addProductForm, file, userDto.getWarehouseId());
-            model.addAttribute("products", productService.adminWarehouseProducts(ProductSearchForm.builder().categoryId(0L).build(), userDto.getId()));
-            model.addAttribute("users", authService.getAllUsers());
+            model.addAttribute("products", productService.adminWarehouseProducts(userDto.getId()));
+            model.addAttribute("users", authService.getAllActiveUsers());
             model.addAttribute("success", true);
             model.addAttribute("message", "Product added/updated successfully");
             return "Admin-Product";
 
         } catch (Exception e) {
-            model.addAttribute("products", productService.adminWarehouseProducts(ProductSearchForm.builder().categoryId(0L).build(), userDto.getId()));
-            model.addAttribute("users", authService.getAllUsers());
+            model.addAttribute("products", productService.adminWarehouseProducts(userDto.getId()));
+            model.addAttribute("users", authService.getAllActiveUsers());
             model.addAttribute("success", false);
             model.addAttribute("message", e.getMessage());
             return "Admin-Product";
         }
-    }
-    
-    @PostMapping("/admin/product-search")
-    public String searchProduct(@ModelAttribute(name = "ProductSearchForm") ProductSearchForm productSearchForm,
-                                HttpSession httpSession,
-                                HttpServletRequest request,
-                                HttpServletResponse response, Model model) {
-        UserDto userDto = authService.authenticateUser(request, httpSession);
-        if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
-            return "redirect:/";
-        model.addAttribute("products", productService.adminWarehouseProducts(productSearchForm, userDto.getId()));
-        model.addAttribute("users", authService.getAllUsers());
-        model.addAttribute("success", "null");
-        model.addAttribute("message", "");
-        return "Admin-Product";
     }
 
     @GetMapping("/admin/product-status-update")
@@ -112,15 +97,15 @@ public class AdminController {
 
         try {
             productService.productStatusUpdate(productId);
-            model.addAttribute("products", productService.adminWarehouseProducts(ProductSearchForm.builder().categoryId(0L).build(), userDto.getId()));
-            model.addAttribute("users", authService.getAllUsers());
+            model.addAttribute("products", productService.adminWarehouseProducts(userDto.getId()));
+            model.addAttribute("users", authService.getAllActiveUsers());
             model.addAttribute("success", true);
             model.addAttribute("message", "Product status updated successfully");
             return "Admin-Product";
 
         } catch (Exception e) {
-            model.addAttribute("products", productService.adminWarehouseProducts(ProductSearchForm.builder().categoryId(0L).build(), userDto.getId()));
-            model.addAttribute("users", authService.getAllUsers());
+            model.addAttribute("products", productService.adminWarehouseProducts(userDto.getId()));
+            model.addAttribute("users", authService.getAllActiveUsers());
             model.addAttribute("success", false);
             model.addAttribute("message", e.getMessage());
             return "Admin-Product";
@@ -130,20 +115,21 @@ public class AdminController {
 
     /* Order Related functions */
     
-    @GetMapping("/admin/get-active-orders")
-    public String getActiveOrders(HttpServletRequest request, HttpSession httpSession, HttpServletResponse response, Model model) {
+    @GetMapping("/admin/get-orders")
+    public String getActiveOrders(@RequestParam(required = false) String tid, @RequestParam(required = false) String status,
+            HttpServletRequest request, HttpSession httpSession, HttpServletResponse response, Model model) {
+        
         UserDto userDto = authService.authenticateUser(request, httpSession);
         if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
             return "redirect:/";
 
-        model.addAttribute("orders", productService.getActiveOrders(userDto.getWarehouseId()));
-        return "Admin-Active-Orders";
+        model.addAttribute("orders", productService.getAdminOrders(userDto.getWarehouseId(), tid, status));
+        return "Admin-Orders";
     }
 
     @PostMapping("/admin-update-order-status")
     public String updateOrderStatus(@ModelAttribute(name = "UpdateOrderStatusForm") UpdateOrderStatusForm updateOrderStatusForm,
-                                    HttpServletRequest request,
-                                    HttpSession httpSession, HttpServletResponse response, Model model) {
+                                    HttpServletRequest request, HttpSession httpSession, Model model) {
         UserDto userDto = authService.authenticateUser(request, httpSession);
         if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
             return "redirect:/";
@@ -167,6 +153,26 @@ public class AdminController {
             return "redirect:/";
         model.addAttribute("user", userDto);
         return "Admin-chat-room";
+    }
+    
+    /* Users Related functions */
+    
+    @GetMapping("/admin/get-all-users")
+    public String getAllUsers(HttpServletRequest request, HttpSession httpSession, Model model) {
+        UserDto userDto = authService.authenticateUser(request, httpSession);
+        if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
+            return "redirect:/";
+        model.addAttribute("users", authService.getAllUsers());
+        return "Users";
+    }
+    
+    @PostMapping("/admin/users/active/{id}")
+    public String enableOrDisableUser(@PathVariable Long id, HttpServletRequest request, HttpSession httpSession, Model model) {
+        UserDto userDto = authService.authenticateUser(request, httpSession);
+        if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
+            return "redirect:/";
+        authService.toggleUserActiveStatus(id);
+        return "redirect:/admin/get-all-users";
     }
 
 }

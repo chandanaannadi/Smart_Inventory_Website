@@ -1,31 +1,41 @@
-\package com.example.inventorySystem.controller;
+package com.example.inventorySystem.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpHeaders;
 
 import com.example.inventorySystem.dto.UserDto;
 import com.example.inventorySystem.dto.forms.*;
+import com.example.inventorySystem.entity.Bill;
 import com.example.inventorySystem.entity.Order;
+import com.example.inventorySystem.entity.OrderHistory;
+import com.example.inventorySystem.entity.ProductHistory;
 import com.example.inventorySystem.service.AuthService;
+import com.example.inventorySystem.service.BillService;
 import com.example.inventorySystem.service.ProductService;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Controller
 public class MainController {
 
     @Autowired
-    AuthService authService;
+    private AuthService authService;
     @Autowired
-    ProductService productService;
-
+    private ProductService productService;
+    @Autowired
+    private BillService billService;
+    
     /* Login/SignUp/Logout/Reset Related functions */
 
     @GetMapping("/signUp")
@@ -71,7 +81,7 @@ public class MainController {
                 response.addCookie(rememberMeCookie);
             } else {
                 Cookie rememberMeCookie = new Cookie("remember-me-cookie", "");
-                rememberMeCookie.setMaxAge(0); // 1 month in seconds
+                rememberMeCookie.setMaxAge(0);
                 response.addCookie(rememberMeCookie);
             }
             httpSession.setAttribute("session-token", userDto.getSessionToken());
@@ -138,24 +148,21 @@ public class MainController {
             return "redirect:/admin/dashboard";
         if (userDto != null) {
             httpSession.setAttribute("session-token", userDto.getSessionToken());
-            model.addAttribute("products", productService.userProducts(ProductSearchForm.builder().categoryId(0L).build(), userDto.getId()));
+            model.addAttribute("products", productService.userProducts(userDto.getId()));
             return "Product";
         }
         return "Login";
     }
-
-    @PostMapping("/product-search")
-    public String searchProduct(@ModelAttribute(name = "ProductSearchForm") ProductSearchForm productSearchForm,
-                                HttpSession httpSession,
-                                HttpServletRequest request,
-                                HttpServletResponse response, Model model) {
-        UserDto userDto = authService.authenticateUser(request, httpSession);
-        if (userDto != null && userDto.getRole().equalsIgnoreCase("ADMIN"))
-            return "redirect:/admin/dashboard";
-        
-        model.addAttribute("orderPlaced",  "null");
-        model.addAttribute("products", productService.userProducts(productSearchForm, userDto.getId()));
-        return "Product";
+    
+    @GetMapping("/products/{productId}/history")
+    public String viewProductHistory(@PathVariable Long productId, HttpServletRequest request, HttpSession httpSession, Model model) {
+    	UserDto userDto = authService.authenticateUser(request, httpSession);
+    	
+        List<ProductHistory> historyList = productService.getProductHistory(productId);
+        model.addAttribute("productHistory", historyList);
+        model.addAttribute("productId", productId);
+        model.addAttribute("isAdmin", userDto.getRole().equalsIgnoreCase("admin"));
+        return "product-history";
     }
     
     
@@ -198,13 +205,15 @@ public class MainController {
     /* Order Related functions */
 
     @GetMapping("/get-orders")
-    public String getOrders(HttpServletRequest request, HttpSession httpSession, Model model) {
+    public String getOrders(@RequestParam(required = false) String tid, @RequestParam(required = false) String status,
+    		HttpServletRequest request, HttpSession httpSession, Model model) {
+    	
         UserDto userDto = authService.authenticateUser(request, httpSession);
         if (userDto != null && userDto.getRole().equalsIgnoreCase("ADMIN"))
             return "redirect:/admin/dashboard";
+        
         model.addAttribute("user", userDto);
-        List<Order> orders = productService.getOrders(userDto.getId());
-        model.addAttribute("orders", orders);
+        model.addAttribute("orders", productService.getOrders(userDto.getId(), tid, status));
         return "My-Orders";
     }
     
@@ -218,7 +227,7 @@ public class MainController {
 	    productService.createOrder(orderForm, file, userDto.getId());
 	    model.addAttribute("orderPlaced", true);
 	    model.addAttribute("user", userDto);
-	    model.addAttribute("products", productService.userProducts(ProductSearchForm.builder().categoryId(0L).build(), userDto.getId()));
+	    model.addAttribute("products", productService.userProducts(userDto.getId()));
         return "Product";
 	}
     
@@ -233,6 +242,44 @@ public class MainController {
         return true;
     }
     
+    @GetMapping("/shippingLabel/{orderId}")
+    public ResponseEntity<byte[]> downloadShippingLabel(@PathVariable Long orderId,
+    		                  HttpServletRequest request, HttpSession httpSession) {
+    	UserDto userDto = authService.authenticateUser(request, httpSession);
+	    if (userDto == null) {
+	    	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	    }
+	    
+        try {
+	    	Order order = productService.getOrderById(orderId);
+	
+	        if (order == null || order.getShippingLabel() == null) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	        }
+	
+	        byte[] fileData = order.getShippingLabel();
+	
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=shippingLabel.pdf");
+	        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
+	
+	        return new ResponseEntity<>(fileData, headers, HttpStatus.OK);
+        } catch(Exception e) {
+        	return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
+    @GetMapping("/orders/{orderId}/history")
+    public String viewOrderHistory(@PathVariable Long orderId, HttpServletRequest request, HttpSession httpSession, Model model) {
+    	UserDto userDto = authService.authenticateUser(request, httpSession);
+    	
+        List<OrderHistory> historyList = productService.getOrderHistory(orderId);
+        model.addAttribute("orderHistory", historyList);
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("isAdmin", userDto.getRole().equalsIgnoreCase("admin"));
+        return "order-history";
+    }
+    
     
     /* Chat Related functions */
     
@@ -244,6 +291,56 @@ public class MainController {
         model.addAttribute("user", userDto);
         return "chat-room";
     }
+    
+    /* Billing Related functions */
+    
+    @GetMapping("billing/history")
+    public String getBillingHistory(HttpServletRequest request, HttpSession session, Model model) {
+        UserDto userDto = authService.authenticateUser(request, session);
+        if (userDto == null) {
+            return "redirect:/login";
+        }
 
+        List<Long> warehouseIds = productService.getWarehouseIdsForUser(userDto.getId());
+
+        // Create bills for each warehouse if no bills exist for the current month
+        for (Long warehouseId : warehouseIds) {
+            Bill currentBill = billService.getCurrentBillingCycle(userDto.getId(), warehouseId);
+            if (currentBill == null) {
+                double warehouseAmountDue = productService.calculateTotalForWarehouse(warehouseId, userDto.getId());
+                billService.createNewMonthlyBill(userDto.getId(), warehouseId, warehouseAmountDue);
+            }
+        }
+
+        List<Bill> currentMonthBills = billService.getCurrentMonthBills(userDto.getId());
+        List<Bill> billingHistory = billService.getBillingHistoryForUser(userDto.getId());
+
+        // Add data to the model
+        model.addAttribute("currentMonthBills", currentMonthBills);
+        model.addAttribute("billingHistory", billingHistory);
+
+        return "billing-page";
+    }
+
+    @PostMapping("billing/pay")
+    @ResponseBody
+    public Boolean makePayment(HttpServletRequest request, HttpSession session,
+            Model model, @RequestBody BillingForm billingForm) {
+        UserDto userDto = authService.authenticateUser(request, session);
+        if (userDto == null) {
+            return false;
+        }
+
+        Bill unpaidBill = billService.getBillById(billingForm.getBillId());
+        if (unpaidBill != null) {
+            unpaidBill.setPaid(true);
+            unpaidBill.setPaymentDate(new Timestamp(System.currentTimeMillis()));
+            billService.saveBill(unpaidBill);
+
+            return true;
+        }
+
+        return false;
+    }
 
 }

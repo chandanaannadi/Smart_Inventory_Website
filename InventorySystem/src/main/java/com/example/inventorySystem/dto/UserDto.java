@@ -14,6 +14,7 @@ public class UserDto {
     private String userName;
     private String name;
     private String phoneNumber;
+    private String email;
     private String sessionToken;
     private String rememberMeToken;
     private String role;
@@ -21,6 +22,7 @@ public class UserDto {
     private Status status;
     private Long warehouseId;
     private String warehouseName;
+    private Boolean active;
     
 
     public String generateBase64Image() {

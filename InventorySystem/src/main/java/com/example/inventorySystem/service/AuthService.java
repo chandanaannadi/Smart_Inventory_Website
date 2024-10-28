@@ -120,6 +120,7 @@ public class AuthService {
         userRepository.save(User.builder()
                 .userName(signUpForm.getUserName())
                 .password(signUpForm.getPassword())
+                .email(signUpForm.getEmail())
                 .role("CUSTOMER")
                 .status(Status.ONLINE)
                 .active(Boolean.TRUE)
@@ -146,7 +147,7 @@ public class AuthService {
 
     @SneakyThrows
     public void changePassword(UserProfileForm userProfileForm) {
-        User user = userRepository.findByUserName(userProfileForm.getUserName());
+        User user = userRepository.findByEmail(userProfileForm.getEmail());
         if (user == null)
             throw new Exception("User does not exists");
         if (!userProfileForm.getCode().equalsIgnoreCase("1234"))

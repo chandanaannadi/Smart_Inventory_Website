@@ -82,9 +82,9 @@ public class ProductService {
         User user = userRepository.findById(userId).orElseThrow(() -> new Exception("Invalid user"));
         
         if (tid != null && !tid.isBlank() && status != null && !status.isBlank()) {
-            orders = orderRepository.findByUserAndOrderStatusAndTrackingNumber(user, status, tid);
+            orders = orderRepository.findByUserAndOrderStatusAndTrackingNumberContaining(user, status, tid);
         } else if (tid != null && !tid.isBlank()) {
-            orders = orderRepository.findByUserAndTrackingNumber(user, tid);
+            orders = orderRepository.findByUserAndTrackingNumberContaining(user, tid);
         } else if (status != null && !status.isBlank()) {
             orders = orderRepository.findByUserAndOrderStatus(user, status);
         } else {

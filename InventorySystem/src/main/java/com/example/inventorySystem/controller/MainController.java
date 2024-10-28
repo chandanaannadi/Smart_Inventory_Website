@@ -1,3 +1,4 @@
+
 package com.example.inventorySystem.controller;
 
 import jakarta.servlet.http.Cookie;
@@ -12,7 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpHeaders;
-
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.List;
 import com.example.inventorySystem.dto.UserDto;
 import com.example.inventorySystem.dto.forms.*;
 import com.example.inventorySystem.entity.Bill;
@@ -22,6 +25,9 @@ import com.example.inventorySystem.entity.ProductHistory;
 import com.example.inventorySystem.service.AuthService;
 import com.example.inventorySystem.service.BillService;
 import com.example.inventorySystem.service.ProductService;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -108,8 +114,14 @@ public class MainController {
         }
         model.addAttribute("success", "");
         model.addAttribute("message", "");
-        return "Forgot_password";
+        return "forgot-password";
     }
+    
+    @GetMapping("/change-password")
+    public String changePassword(HttpServletRequest request, HttpSession session, Model model) {
+               return "reset-password";
+    }
+
 
     @PostMapping("/change-password")
     public String changePassword(@ModelAttribute(name = "UserProfileForm") UserProfileForm userProfileForm,
@@ -119,12 +131,12 @@ public class MainController {
             authService.changePassword(userProfileForm);
             model.addAttribute("success", true);
             model.addAttribute("message", "User password updated successfully, Please proceed to login");
-            return "forgot-password";
+            return "reset-password";
 
         } catch (Exception e) {
             model.addAttribute("success", false);
             model.addAttribute("message", e.getMessage());
-            return "forgot-password";
+            return "reset-password";
         }
     }
 
@@ -295,6 +307,7 @@ public class MainController {
     /* Billing Related functions */
     
     @GetMapping("billing/history")
+
     public String getBillingHistory(HttpServletRequest request, HttpSession session, Model model) {
         UserDto userDto = authService.authenticateUser(request, session);
         if (userDto == null) {
@@ -315,13 +328,44 @@ public class MainController {
         List<Bill> currentMonthBills = billService.getCurrentMonthBills(userDto.getId());
         List<Bill> billingHistory = billService.getBillingHistoryForUser(userDto.getId());
 
+        // Get the current date
+        LocalDate currentDate = LocalDate.now();
+
+        // Get the first and last day of the previous month
+        LocalDate firstDayOfLastMonth = currentDate.minusMonths(1).with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate lastDayOfLastMonth = currentDate.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+
+        // Convert LocalDate to Timestamp
+        Timestamp startDate = Timestamp.valueOf(firstDayOfLastMonth.atStartOfDay());
+        Timestamp endDate = Timestamp.valueOf(lastDayOfLastMonth.atTime(23, 59, 59));
+        Timestamp dueDate = Timestamp.valueOf(lastDayOfLastMonth.atTime(23, 59, 59)); // Due date is the last day of the previous month
+
+        // Update billing dates and due date for currentMonthBills
+        for (Bill bill : currentMonthBills) {
+            bill.setBillStartDate(startDate);
+            bill.setBillEndDate(endDate);
+            bill.setDueDate(dueDate); // Set due date to the last day of the previous month
+            if (bill.getPaymentDate() != null) {
+                bill.setPaymentDate(endDate); // Set payment date to the end of the previous month
+            }
+        }
+
+        // Update billing dates and due date for billingHistory
+        for (Bill bill : billingHistory) {
+            bill.setBillStartDate(startDate);
+            bill.setBillEndDate(endDate);
+            bill.setDueDate(dueDate); // Set due date to the last day of the previous month
+            if (bill.getPaymentDate() != null) {
+                bill.setPaymentDate(endDate); // Set payment date to the end of the previous month
+            }
+        }
+
         // Add data to the model
         model.addAttribute("currentMonthBills", currentMonthBills);
         model.addAttribute("billingHistory", billingHistory);
 
         return "billing-page";
     }
-
     @PostMapping("billing/pay")
     @ResponseBody
     public Boolean makePayment(HttpServletRequest request, HttpSession session,

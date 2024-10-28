@@ -136,10 +136,10 @@ public class AdminController {
 
         try {
             productService.updateOrderStatus(updateOrderStatusForm);
-            return "redirect:/admin/get-active-orders";
+            return "redirect:/admin/get-orders";
 
         } catch (Exception e) {
-            return "redirect:/admin/get-active-orders";
+            return "redirect:/admin/get-orders";
         }
     }
     

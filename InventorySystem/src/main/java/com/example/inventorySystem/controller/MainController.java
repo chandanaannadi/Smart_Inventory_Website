@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpHeaders;
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.List;
 import com.example.inventorySystem.dto.UserDto;
 import com.example.inventorySystem.dto.forms.*;
@@ -25,12 +24,8 @@ import com.example.inventorySystem.entity.ProductHistory;
 import com.example.inventorySystem.service.AuthService;
 import com.example.inventorySystem.service.BillService;
 import com.example.inventorySystem.service.ProductService;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-
-import java.sql.Timestamp;
-import java.util.List;
 
 @Controller
 public class MainController {
@@ -305,9 +300,7 @@ public class MainController {
     }
     
     /* Billing Related functions */
-    
     @GetMapping("billing/history")
-
     public String getBillingHistory(HttpServletRequest request, HttpSession session, Model model) {
         UserDto userDto = authService.authenticateUser(request, session);
         if (userDto == null) {
@@ -316,49 +309,24 @@ public class MainController {
 
         List<Long> warehouseIds = productService.getWarehouseIdsForUser(userDto.getId());
 
-        // Create bills for each warehouse if no bills exist for the current month
-        for (Long warehouseId : warehouseIds) {
-            Bill currentBill = billService.getCurrentBillingCycle(userDto.getId(), warehouseId);
-            if (currentBill == null) {
-                double warehouseAmountDue = productService.calculateTotalForWarehouse(warehouseId, userDto.getId());
-                billService.createNewMonthlyBill(userDto.getId(), warehouseId, warehouseAmountDue);
+        // Check if it's the first day of a new month to generate bills for the last month
+        LocalDate today = LocalDate.now();
+        if (today.getDayOfMonth() == 1) {  // First day of the month
+            LocalDate endOfLastMonth = today.minusMonths(1).withDayOfMonth(today.minusMonths(1).lengthOfMonth());
+            
+            for (Long warehouseId : warehouseIds) {
+                // Check if a bill for the last month has already been created
+                Bill latestBill = billService.getMostRecentBill(userDto.getId(), warehouseId);
+                if (latestBill == null || !latestBill.getBillEndDate().toLocalDateTime().toLocalDate().equals(endOfLastMonth)) {
+                    // Calculate the total for the warehouse and create a new bill for the last month
+                    double warehouseAmountDue = productService.calculateTotalForWarehouse(warehouseId, userDto.getId());
+                    billService.createNewMonthlyBill(userDto.getId(), warehouseId, warehouseAmountDue, endOfLastMonth);
+                }
             }
         }
 
         List<Bill> currentMonthBills = billService.getCurrentMonthBills(userDto.getId());
         List<Bill> billingHistory = billService.getBillingHistoryForUser(userDto.getId());
-
-        // Get the current date
-        LocalDate currentDate = LocalDate.now();
-
-        // Get the first and last day of the previous month
-        LocalDate firstDayOfLastMonth = currentDate.minusMonths(1).with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate lastDayOfLastMonth = currentDate.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
-
-        // Convert LocalDate to Timestamp
-        Timestamp startDate = Timestamp.valueOf(firstDayOfLastMonth.atStartOfDay());
-        Timestamp endDate = Timestamp.valueOf(lastDayOfLastMonth.atTime(23, 59, 59));
-        Timestamp dueDate = Timestamp.valueOf(lastDayOfLastMonth.atTime(23, 59, 59)); // Due date is the last day of the previous month
-
-        // Update billing dates and due date for currentMonthBills
-        for (Bill bill : currentMonthBills) {
-            bill.setBillStartDate(startDate);
-            bill.setBillEndDate(endDate);
-            bill.setDueDate(dueDate); // Set due date to the last day of the previous month
-            if (bill.getPaymentDate() != null) {
-                bill.setPaymentDate(endDate); // Set payment date to the end of the previous month
-            }
-        }
-
-        // Update billing dates and due date for billingHistory
-        for (Bill bill : billingHistory) {
-            bill.setBillStartDate(startDate);
-            bill.setBillEndDate(endDate);
-            bill.setDueDate(dueDate); // Set due date to the last day of the previous month
-            if (bill.getPaymentDate() != null) {
-                bill.setPaymentDate(endDate); // Set payment date to the end of the previous month
-            }
-        }
 
         // Add data to the model
         model.addAttribute("currentMonthBills", currentMonthBills);
@@ -366,6 +334,7 @@ public class MainController {
 
         return "billing-page";
     }
+    
     @PostMapping("billing/pay")
     @ResponseBody
     public Boolean makePayment(HttpServletRequest request, HttpSession session,

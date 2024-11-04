@@ -166,8 +166,7 @@
         }
 
         function makePayment() {
-            // Get form ///
-
+            // Get form values
             const cardNumber = document.getElementById('cardNumber').value;
             const cardExpiry = document.getElementById('cardExpiry').value;
             const cardCVC = document.getElementById('cardCVC').value;
@@ -176,22 +175,21 @@
                 console.log(`Processing payment for bill ID: ${currentBillId}`);
                 console.log(`Card Details: ${cardNumber}, Expiry: ${cardExpiry}, CVC: ${cardCVC}`);
 
-                // Assuming payment was successful, you could handle the result here
-                // Example: send payment details to server via AJAX or redirect to a confirmation page
-                alert('Payment processed successfully!');
-                
-                // Hide the modal
-                let paymentModal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
-                paymentModal.hide();
+                // Here you would typically make an AJAX call to your backend to process the payment
 
-                // Optionally, update the page to reflect the paid status
-                // (This will depend on your server-side implementation)
-                location.reload();
+                // Close the modal after payment processing
+                const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+                modal.hide();
+
+                // Reset form
+                document.getElementById('paymentForm').reset();
+                alert('Payment processed successfully!'); // Provide user feedback
             } else {
-                alert('Please fill in all payment details.');
+                alert('Please fill in all fields.');
             }
         }
     </script>
+
 </body>
 
 </html>

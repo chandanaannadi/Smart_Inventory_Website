@@ -1,42 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head th:replace="~{fragments/Head::head}"></head>
-	<body>
-		<div th:replace="~{fragments/Navbar::navbar}"></div>
-		<script th:replace="~{fragments/Scripts::script1}"></script>
-		<script th:replace="~{fragments/Scripts::script2}"></script>
-		<script th:replace="~{fragments/Scripts::script3}"></script>
+	<head th:replace="~{fragments/Head::head}">
+		<style>
+			/* Custom CSS for Enhancing the Order History UI */
 
+			/* Card Styling */
+			.card {
+				border-radius: 15px;
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+				margin-bottom: 20px;
+			}
+			.card-body {
+				padding: 20px;
+			}
+
+			/* Form Input and Button Styling */
+			.form-control,
+			.form-select {
+				border-radius: 8px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+			}
+			.btn-primary {
+				background-color: #007bff;
+				border-color: #007bff;
+				box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
+				transition: all 0.3s;
+			}
+			.btn-primary:hover {
+				background-color: #0056b3;
+			}
+			.btn-outline-danger {
+				border-radius: 5px;
+				transition: all 0.3s;
+			}
+			.btn-outline-danger:hover {
+				background-color: #dc3545;
+				color: #fff;
+			}
+
+			/* Order Section Styling */
+			.fw-bold {
+				font-weight: 700;
+			}
+			.text-primary {
+				color: #007bff !important;
+			}
+			.text-secondary {
+				color: #6c757d !important;
+			}
+			.text-muted {
+				color: #6c757d !important;
+			}
+			.text-black {
+				color: #343a40 !important;
+			}
+
+			/* Responsive Design */
+			@media (max-width: 768px) {
+				.card-body {
+					padding: 15px;
+				}
+				.row {
+					flex-direction: column;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Navbar -->
+		<div th:replace="~{fragments/Navbar::navbar}"></div>
+
+		<!-- Main Container -->
 		<div class="container card-container my-5">
-			<div class="card" style="border-radius: 15px">
+			<div class="card">
 				<div class="card-body p-0">
 					<div class="p-5">
 						<!-- Search Form Section -->
 						<form action="/get-orders" method="get" class="mb-5">
 							<div class="row">
 								<!-- Tracking ID Input -->
-								<div class="col-md-6">
+								<div class="col-md-6 mb-3">
 									<label for="trackingId" class="form-label fw-bold">Tracking ID</label>
 									<input
 										type="text"
 										id="trackingId"
 										name="tid"
-										class="form-control shadow-sm"
+										class="form-control"
 										placeholder="Enter Tracking ID"
 										th:value="${#strings.defaultString(param.tid, '')}"
 									/>
 								</div>
 
 								<!-- Status Dropdown -->
-								<div class="col-md-4">
+								<div class="col-md-4 mb-3">
 									<label for="status" class="form-label fw-bold">Status</label>
-									<select id="status" name="status" class="form-select shadow-sm">
+									<select id="status" name="status" class="form-select">
 										<option value="" th:selected="${#strings.defaultString(param.status, '') == ''}">Choose Status</option>
 										<option value="PROCESSING" th:selected="${#strings.defaultString(param.status, '') == 'PROCESSING'}">Processing</option>
 										<option value="PACKING" th:selected="${#strings.defaultString(param.status, '') == 'PACKING'}">Packing</option>
-										<option value="OUT_FOR_DELIVERY" th:selected="${#strings.defaultString(param.status, '') == 'OUT_FOR_DELIVERY'}">
-											Out for Delivery
-										</option>
+										<option value="OUT_FOR_DELIVERY" th:selected="${#strings.defaultString(param.status, '') == 'OUT_FOR_DELIVERY'}">Out for Delivery</option>
 										<option value="DELIVERED" th:selected="${#strings.defaultString(param.status, '') == 'DELIVERED'}">Delivered</option>
 										<option value="REJECTED" th:selected="${#strings.defaultString(param.status, '') == 'REJECTED'}">Rejected</option>
 									</select>
@@ -44,23 +106,24 @@
 
 								<!-- Submit Button -->
 								<div class="col-md-2 d-flex align-items-end">
-									<button class="btn btn-primary shadow-sm" type="submit">Search</button>
+									<button class="btn btn-primary w-100" type="submit">Search</button>
 								</div>
 							</div>
 						</form>
 
 						<!-- Orders List Section -->
-						<div class="d-flex justify-content-between align-items-center mb-5">
-							<h1 class="fw-bold mb-0 text-black">My Orders</h1>
-							<h6 class="mb-0 text-muted"><span th:text="${orders.size()}"></span> items</h6>
+						<div class="d-flex justify-content-between align-items-center mb-4">
+							<h1 class="fw-bold text-black">My Orders</h1>
+							<h6 class="text-muted"><span th:text="${orders.size()}"></span> items</h6>
 						</div>
 						<hr class="my-4" />
 
-						<div th:each="order , iterStat: ${orders}" class="card mb-4 shadow-sm border-0">
-							<div class="card-body p-4">
+						<!-- Loop Through Orders -->
+						<div th:each="order, iterStat : ${orders}" class="card border-0">
+							<div class="card-body">
 								<div class="row align-items-center">
 									<!-- Order Info Section -->
-									<div class="col-md-5">
+									<div class="col-md-5 mb-3">
 										<h5 class="fw-bold text-primary">Order # <span th:text="${iterStat.index + 1}"></span></h5>
 										<p class="mb-2"><span class="text-muted">Status:</span> <strong th:text="${order.orderStatus}"></strong></p>
 										<p class="mb-2"><span class="text-muted">Warehouse Id:</span> <strong th:text="${order.warehouseId}"></strong></p>
@@ -68,31 +131,30 @@
 									</div>
 
 									<!-- Product Info Section -->
-									<div class="col-md-5">
+									<div class="col-md-5 mb-3">
 										<h6 class="fw-bold text-secondary">Product Details</h6>
-										<p class="mb-2">
-											<span class="text-muted">Product Name:</span> <strong th:text="${order.getProduct().getProductName()}"></strong>
-										</p>
+										<p class="mb-2"><span class="text-muted">Product Name:</span> <strong th:text="${order.getProduct().getProductName()}"></strong></p>
 										<p class="mb-2"><span class="text-muted">Quantity:</span> <strong th:text="${order.getQuantity()}"></strong></p>
 										<p class="mb-0">
 											<span class="text-muted">Shipping Label:</span>
-											<strong><a th:href="@{/shippingLabel/{orderId} (orderId=${order.id})}" target="_blank"> Download </a></strong>
+											<strong><a th:href="@{/shippingLabel/{orderId} (orderId=${order.id})}" target="_blank">Download</a></strong>
 										</p>
 									</div>
 
 									<!-- Order Status Form Section -->
-									<div class="col-md-2">
-										<p class="mb-2"><a class="text-secondary" th:href="@{/orders/{orderId}/history (orderId=${order.id})}">View Order History</a></p>
+									<div class="col-md-2 mb-3">
+										<p class="mb-2">
+											<a class="text-secondary" th:href="@{/orders/{orderId}/history (orderId=${order.id})}">View Order History</a>
+										</p>
 										<th:block th:if="${order.orderStatus eq 'PROCESSING'}">
-											<button type="button" class="btn btn-outline-danger btn-sm px-4" th:onclick="'cancelOrder(' + ${order.id} + ')'">
-												Cancel Order
-											</button>
+											<button type="button" class="btn btn-outline-danger btn-sm" th:onclick="'cancelOrder(' + ${order.id} + ')'">Cancel Order</button>
 										</th:block>
 									</div>
 								</div>
 							</div>
 						</div>
 
+						<!-- Back to Products Link -->
 						<div class="pt-5">
 							<h6 class="mb-0">
 								<a th:href="@{/}" class="text-body"><i class="fas fa-long-arrow-alt-left me-2"></i>Back to Products</a>
@@ -103,6 +165,12 @@
 			</div>
 		</div>
 
+		<!-- Footer -->
 		<div th:replace="~{fragments/Footer::footer}"></div>
+
+		<!-- Scripts -->
+		<script th:replace="~{fragments/Scripts::script1}"></script>
+		<script th:replace="~{fragments/Scripts::script2}"></script>
+		<script th:replace="~{fragments/Scripts::script3}"></script>
 	</body>
 </html>

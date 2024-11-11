@@ -2,13 +2,80 @@
 <html lang="en">
 	<head th:replace="~{fragments/Head::head}">
 		<title>Product History</title>
+		<style>
+			/* Custom CSS Styles */
+
+			/* Styling the Product History card */
+			.card {
+				border-radius: 10px;
+				box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+				background-color: #fff;
+			}
+
+			/* Styling the table */
+			.table {
+				margin-bottom: 0;
+				border-radius: 5px;
+				overflow: hidden;
+			}
+			.table th {
+				background-color: #f8f9fa;
+				color: #333;
+			}
+			.table td {
+				padding: 12px;
+			}
+			.table-hover tbody tr:hover {
+				background-color: #f1f3f5;
+			}
+
+			/* Back to Products button */
+			.btn-outline-primary {
+				border-color: #007bff;
+				color: #007bff;
+				transition: all 0.3s;
+			}
+			.btn-outline-primary:hover {
+				background-color: #007bff;
+				color: #fff;
+			}
+
+			/* Making the card more responsive */
+			@media (max-width: 768px) {
+				.card {
+					padding: 15px;
+				}
+				.table-responsive {
+					overflow-x: auto;
+				}
+			}
+
+			/* Text customization */
+			.fw-bold {
+				font-weight: 700;
+			}
+			.text-primary {
+				color: #007bff !important;
+			}
+			.text-secondary {
+				color: #6c757d !important;
+			}
+			.text-dark {
+				color: #343a40 !important;
+			}
+			.text-muted {
+				color: #6c757d !important;
+			}
+		</style>
 	</head>
 	<body>
+		<!-- Navbar -->
 		<div th:replace="~{fragments/Navbar::${isAdmin ? 'admin-navbar' : 'navbar'}}"></div>
 
+		<!-- Main Container -->
 		<div class="container my-5">
 			<!-- Card Wrapper for Product History -->
-			<div class="card shadow-sm" style="border-radius: 10px">
+			<div class="card shadow-sm">
 				<div class="card-body">
 					<h2 class="fw-bold mb-4 text-primary">
 						Product History for Product ID:
@@ -45,6 +112,7 @@
 			</div>
 		</div>
 
+		<!-- Footer -->
 		<div th:replace="~{fragments/Footer::footer}"></div>
 
 		<!-- Scripts -->

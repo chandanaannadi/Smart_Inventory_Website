@@ -14,6 +14,7 @@ import com.example.inventorySystem.dto.UserDto;
 import com.example.inventorySystem.dto.forms.*;
 import com.example.inventorySystem.service.AuthService;
 import com.example.inventorySystem.service.ProductService;
+import com.example.inventorySystem.service.BillingService;
 
 import java.util.List;
 
@@ -22,11 +23,15 @@ public class AdminController {
 
     @Autowired
     AuthService authService;
+
     @Autowired
     ProductService productService;
 
+    @Autowired
+    BillingService billingService; // Billing service for billing-related operations
+
     /* Dashboard Related functions */
-    
+
     @GetMapping("/admin/dashboard")
     public String getDashboard(HttpServletRequest request, HttpSession httpSession, HttpServletResponse response, Model model) {
         UserDto userDto = authService.authenticateUser(request, httpSession);
@@ -38,16 +43,15 @@ public class AdminController {
         }
         return "Login";
     }
-    
+
     @GetMapping("/admin/monthly-orders")
     @ResponseBody
     public List<MonthlySaleDto> getMonthlySales(HttpServletRequest request, HttpSession httpSession, HttpServletResponse response, Model model) {
         return productService.getMonthlyOrders();
     }
-    
 
     /* Product Related functions */
-    
+
     @GetMapping("/admin/product")
     public String getProductPage(HttpServletRequest request, HttpSession httpSession, Model model) {
         UserDto userDto = authService.authenticateUser(request, httpSession);
@@ -57,7 +61,6 @@ public class AdminController {
         model.addAttribute("users", authService.getAllActiveUsers());
         model.addAttribute("success", "null");
         model.addAttribute("message", "");
-
         return "Admin-Product";
     }
 
@@ -111,14 +114,12 @@ public class AdminController {
             return "Admin-Product";
         }
     }
-    
 
     /* Order Related functions */
-    
+
     @GetMapping("/admin/get-orders")
     public String getActiveOrders(@RequestParam(required = false) String tid, @RequestParam(required = false) String status,
-            HttpServletRequest request, HttpSession httpSession, HttpServletResponse response, Model model) {
-        
+                                  HttpServletRequest request, HttpSession httpSession, HttpServletResponse response, Model model) {
         UserDto userDto = authService.authenticateUser(request, httpSession);
         if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
             return "redirect:/";
@@ -142,8 +143,53 @@ public class AdminController {
             return "redirect:/admin/get-orders";
         }
     }
-    
-    
+
+    /* Billing Related functions */
+
+    @GetMapping("/admin/billing")
+    public String getBillingPage(HttpServletRequest request, HttpSession httpSession, Model model) {
+        UserDto userDto = authService.authenticateUser(request, httpSession);
+        if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
+            return "redirect:/";
+
+        model.addAttribute("bills", billingService.getAllBills());
+        return "Admin-Billing";
+    }
+
+    @PostMapping("/admin/create-bill")
+    public String createBill(@ModelAttribute(name = "CreateBillingForm") CreateBillingForm createBillingForm,
+                             HttpServletRequest request, HttpSession httpSession, Model model) {
+        UserDto userDto = authService.authenticateUser(request, httpSession);
+        if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
+            return "redirect:/";
+
+        try {
+            billingService.createBill(createBillingForm);
+            return "redirect:/admin/billing";
+
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "Admin-Billing";
+        }
+    }
+
+    @PostMapping("/admin/update-bill")
+    public String updateBill(@ModelAttribute(name = "UpdateBillingForm") UpdateBillingForm updateBillingForm,
+                             HttpServletRequest request, HttpSession httpSession, Model model) {
+        UserDto userDto = authService.authenticateUser(request, httpSession);
+        if (userDto != null && userDto.getRole().equalsIgnoreCase("CUSTOMER"))
+            return "redirect:/";
+
+        try {
+            billingService.updateBill(updateBillingForm);
+            return "redirect:/admin/billing";
+
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "Admin-Billing";
+        }
+    }
+
     /* Chat Related functions */
 
     @GetMapping("/admin/chat")
@@ -154,9 +200,9 @@ public class AdminController {
         model.addAttribute("user", userDto);
         return "Admin-chat-room";
     }
-    
+
     /* Users Related functions */
-    
+
     @GetMapping("/admin/get-all-users")
     public String getAllUsers(HttpServletRequest request, HttpSession httpSession, Model model) {
         UserDto userDto = authService.authenticateUser(request, httpSession);
@@ -165,7 +211,7 @@ public class AdminController {
         model.addAttribute("users", authService.getAllUsers());
         return "Users";
     }
-    
+
     @PostMapping("/admin/users/active/{id}")
     public String enableOrDisableUser(@PathVariable Long id, HttpServletRequest request, HttpSession httpSession, Model model) {
         UserDto userDto = authService.authenticateUser(request, httpSession);
@@ -174,5 +220,4 @@ public class AdminController {
         authService.toggleUserActiveStatus(id);
         return "redirect:/admin/get-all-users";
     }
-
 }

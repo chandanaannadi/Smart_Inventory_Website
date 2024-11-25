@@ -1,34 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head th:replace="~{fragments/Head::head}"></head>
+	<head th:replace="~{fragments/Head::head}">
+		<!-- Add custom styles for the chat interface -->
+		<style>
+			/* General Page Styling */
+			body {
+				font-family: Arial, sans-serif;
+				background-color: #f7f7f7;
+				margin: 0;
+				padding: 0;
+			}
+
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 20px;
+			}
+
+			h2 {
+				color: #333;
+			}
+
+			/* Chat Layout */
+			.chat-container {
+				display: flex;
+				flex-wrap: wrap;
+				background: #fff;
+				border-radius: 8px;
+				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				overflow: hidden;
+			}
+
+			.users-list {
+				width: 250px;
+				background-color: #f1f1f1;
+				padding: 10px;
+				border-right: 1px solid #ddd;
+			}
+
+			.users-list-container h2 {
+				margin-top: 0;
+				font-size: 18px;
+				color: #555;
+			}
+
+			#users {
+				list-style-type: none;
+				padding: 0;
+			}
+
+			#users li {
+				padding: 8px;
+				margin-bottom: 8px;
+				background-color: #e9ecef;
+				border-radius: 4px;
+				cursor: pointer;
+				transition: background-color 0.3s;
+			}
+
+			#users li:hover {
+				background-color: #d6d6d6;
+			}
+
+			.chat-area {
+				flex-grow: 1;
+				padding: 20px;
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-end;
+			}
+
+			#chat-messages {
+				overflow-y: auto;
+				flex-grow: 1;
+				max-height: 400px;
+				margin-bottom: 15px;
+				padding-right: 10px;
+			}
+
+			.message-input {
+				display: flex;
+				align-items: center;
+				background-color: #f1f1f1;
+				padding: 10px;
+				border-radius: 8px;
+			}
+
+			.message-input input {
+				width: 80%;
+				padding: 10px;
+				border: none;
+				border-radius: 5px;
+				margin-right: 10px;
+				font-size: 16px;
+			}
+
+			.message-input button {
+				background-color: #007bff;
+				color: #fff;
+				border: none;
+				border-radius: 5px;
+				padding: 10px 20px;
+				cursor: pointer;
+				font-size: 16px;
+				transition: background-color 0.3s;
+			}
+
+			.message-input button:hover {
+				background-color: #0056b3;
+			}
+
+			/* Hidden form for messages */
+			#messageForm {
+				display: flex;
+			}
+		</style>
+	</head>
+
 	<body>
 		<script th:replace="~{fragments/Scripts::script1}"></script>
 		<script th:replace="~{fragments/Scripts::script2}"></script>
 		<script th:replace="~{fragments/Scripts::script5}"></script>
 
+		<!-- Navbar inclusion -->
 		<div th:replace="~{fragments/Navbar::navbar}"></div>
 
 		<div class="container mt-5">
 			<input hidden="hidden" th:value="${user.userName}" id="user" />
 
-			<h2>Live chat</h2>
+			<h2>Live Chat</h2>
 			<br /><br />
 
 			<div class="chat-container" id="chat-page">
+				<!-- Users List -->
 				<div class="users-list">
 					<div class="users-list-container">
 						<h2>Online Users</h2>
-						<ul id="users"></ul>
+						<ul id="users">
+							<!-- Example User -->
+							<li>John Doe</li>
+							<li>Jane Smith</li>
+						</ul>
 					</div>
 				</div>
 
+				<!-- Chat Area -->
 				<div class="chat-area">
-					<div class="chat-area" id="chat-messages"></div>
+					<div id="chat-messages">
+						<!-- Chat messages will be dynamically inserted here -->
+					</div>
 
-					<form id="messageForm" name="messageForm" class="hidden">
+					<!-- Message Form -->
+					<form id="messageForm" name="messageForm">
 						<div class="message-input">
 							<input autocomplete="off" type="text" id="message" placeholder="Type your message..." />
-							<button>Send</button>
+							<button type="submit">Send</button>
 						</div>
 					</form>
 				</div>
@@ -39,6 +165,8 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 		<script th:src="@{/js/LiveChatCustomer.js}"></script>
+
+		<!-- Footer inclusion -->
 		<div th:replace="~{fragments/Footer::footer}"></div>
 	</body>
 </html>

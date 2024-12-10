@@ -147,11 +147,12 @@ public class AuthService {
 
     @SneakyThrows
     public void changePassword(UserProfileForm userProfileForm) {
+    	System.out.println("user email "+userProfileForm.getEmail());
         User user = userRepository.findByEmail(userProfileForm.getEmail());
         if (user == null)
             throw new Exception("User does not exists");
-        if (!userProfileForm.getCode().equalsIgnoreCase("1234"))
-            throw new Exception("Invalid code");
+//        if (!userProfileForm.getCode().equalsIgnoreCase("1234"))
+//            throw new Exception("Invalid code");
         if (!userProfileForm.getNewPassword().equals(userProfileForm.getConfirmPassword()))
             throw new Exception("Password and confirm password are not same");
 

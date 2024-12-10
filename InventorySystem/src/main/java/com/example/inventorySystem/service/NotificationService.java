@@ -1,6 +1,5 @@
 package com.example.inventorySystem.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -10,7 +9,6 @@ public class NotificationService {
 
     private final JavaMailSender mailSender;
 
-    @Autowired
     public NotificationService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }

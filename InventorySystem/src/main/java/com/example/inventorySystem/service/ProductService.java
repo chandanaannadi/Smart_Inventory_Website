@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.inventorySystem.dto.MonthlySaleDto;
+import com.example.inventorySystem.dto.ProductDto;
 import com.example.inventorySystem.dto.UserDto;
 import com.example.inventorySystem.dto.forms.*;
 import com.example.inventorySystem.dto.helper.CommonUtils;
-import com.example.inventorySystem.dto.helper.DateUtils;
 import com.example.inventorySystem.entity.*;
 import com.example.inventorySystem.repository.*;
 
@@ -38,10 +38,18 @@ public class ProductService {
 
     @SuppressWarnings("deprecation")
 	@SneakyThrows
-    public List<Product> adminWarehouseProducts(Long userId) {
+    public List<ProductDto> adminWarehouseProducts(Long userId) {
     	User user = userRepository.getById(userId);
         
-    	return productRepository.findByWarehouseId(user.getWarehouseId());
+    	List<Product> products = productRepository.findByWarehouseId(user.getWarehouseId());
+    	List<ProductDto> productsDto = new ArrayList<ProductDto>();
+    	
+    	for(Product product: products) {
+    		
+    		productsDto.add(ProductDto.builder().product(product).processingQuantity(orderRepository.sumQuantityByProductAndStatus(product.getId(), "PROCESSING")).build());
+    	}
+    	
+    	return productsDto;
     }
 
     @SneakyThrows
@@ -55,7 +63,7 @@ public class ProductService {
             		.quantity(orderForm.getQuantity())
             		.orderStatus("PROCESSING")
             		.warehouseId(orderForm.getWarehouseId())
-            		.orderDate(DateUtils.convertStringToTimestamp(orderForm.getOrderDate()))
+            		.orderDate(new Timestamp(System.currentTimeMillis()))
             		.user(user)
             		.build();
             
@@ -123,7 +131,7 @@ public class ProductService {
         product.setProductName(productForm.getName());
         product.setUpc(productForm.getUpc());
         product.setQuantity(productForm.getQuantity());
-        product.setArivalDate(DateUtils.convertStringToTimestamp(productForm.getArivalDate()));
+        product.setArivalDate(new Timestamp(System.currentTimeMillis()));
         product.setAvailability(productForm.getAvailability() != null ? true : false);
         product.setTrackingId(productForm.getTrackingId());
         product.setPackageId(productForm.getPackageId());

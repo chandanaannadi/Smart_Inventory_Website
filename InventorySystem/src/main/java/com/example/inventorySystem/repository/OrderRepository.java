@@ -41,7 +41,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "GROUP BY " +
             "MONTH(order_date) ", nativeQuery = true)
     List<Object[]> getMonthlyOrdersData();
-    
-    @Query("SELECT o FROM Order o WHERE o.warehouseId = :warehouseId AND o.orderStatus IN :statuses")
-    List<Order> findByWarehouseIdAndOrderStatusIn(@Param("warehouseId") Long warehouseId, @Param("statuses") List<String> statuses);
 }

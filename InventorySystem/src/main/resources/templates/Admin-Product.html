@@ -1,89 +1,290 @@
-<style>
-	body {
-		background-color: #f2f4f8;
-		color: #495057;
-		font-family: 'Arial', sans-serif;
-	}
-	.modal-title {
-		font-weight: bold;
-		color: #0056b3;
-	}
-	.nav-tabs .nav-link {
-		color: #007bff;
-		transition: color 0.3s ease, background-color 0.3s ease;
-	}
-	.nav-tabs .nav-link.active {
-		color: #ffffff;
-		background-color: #007bff;
-		border-color: #007bff;
-		font-weight: bold;
-	}
-	.nav-tabs .nav-link:hover {
-		background-color: #e9ecef;
-	}
-	.product-container {
-		background-color: #ffffff;
-		padding: 30px;
-		border-radius: 12px;
-		box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-	}
-	.table th,
-	.table td {
-		vertical-align: middle;
-		text-align: center;
-	}
-	.table th {
-		background-color: #007bff;
-		color: #ffffff;
-	}
-	.table tr:nth-child(even) {
-		background-color: #f8f9fa;
-	}
-	.table .product-image {
-		border-radius: 8px;
-		width: 60px;
-		height: 60px;
-		object-fit: cover;
-	}
-	.btn-primary, .btn-dark {
-		transition: background-color 0.3s ease, transform 0.2s ease;
-	}
-	.btn-primary:hover {
-		background-color: #0056b3;
-		transform: scale(1.05);
-	}
-	.btn-dark:hover {
-		background-color: #1d2124;
-		transform: scale(1.05);
-	}
-	.preview img {
-		border: 3px solid #007bff;
-		margin-top: 15px;
-		border-radius: 10px;
-		width: 150px;
-		height: 150px;
-		object-fit: cover;
-	}
-	#add-product-btn {
-		margin-top: -5px;
-		padding: 10px 20px;
-		font-size: 16px;
-	}
-	h2 {
-		color: #333333;
-		font-weight: bold;
-		margin-bottom: 15px;
-	}
-	@media (max-width: 768px) {
-		.product-container {
-			padding: 15px;
-		}
-		.table th, .table td {
-			font-size: 12px;
-		}
-		.preview img {
-			width: 100px;
-			height: 100px;
-		}
-	}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+	<head th:replace="~{fragments/Head::head}"></head>
+	<body>
+		<script th:replace="~{fragments/Scripts::script5}"></script>
+		<script th:replace="~{fragments/Scripts::script6}"></script>
+		<script th:replace="~{fragments/Scripts::script7}"></script>
+		<script th:replace="~{fragments/Scripts::script1}"></script>
+		<script th:replace="~{fragments/Scripts::script3}"></script>
+
+		<div th:replace="~{fragments/Navbar::admin-navbar}"></div>
+
+		<!-- Modal for Add/Edit Product -->
+		<div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="form-heading">Check - in Products</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<form action="/admin/add-product" th:object="${AddProductForm}" method="post" enctype="multipart/form-data">
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="name">Product Name</label>
+								<input type="text" class="form-control" id="name" name="name" placeholder="Enter Product Name" required />
+							</div>
+
+							<div class="form-group">
+								<label for="upc">UPC Number</label>
+								<input type="text" class="form-control" id="upc" name="upc" placeholder="Enter Product UPC Number" required />
+							</div>
+
+							<div class="form-group">
+								<label for="packageId">Package ID</label>
+								<input type="text" class="form-control" id="packageId" name="packageId" placeholder="Enter Package ID" required />
+							</div>
+
+							<div class="form-group">
+								<label for="trackingId">Tracking ID</label>
+								<input type="text" class="form-control" id="trackingId" name="trackingId" placeholder="Enter Tracking ID" required />
+							</div>
+
+							<div class="form-group">
+								<label for="quantity">Product Quantity</label>
+								<input type="number" class="form-control" id="quantity" name="quantity" min="0" required />
+							</div>
+
+							<div class="form-group">
+								<label for="availability">In Stock?</label>
+								<input type="checkbox" id="availability" name="availability" value="true" />
+							</div>
+
+							<label for="userId">Owner Username</label>
+							<select class="form-select" name="userId" id="userId" required>
+								<option th:each="user : ${users}" th:value="${user.id}">[(${user.userName})]</option>
+							</select>
+							<input type="text" hidden="hidden" class="form-control" id="productId" name="id" value="" />
+
+							<div class="preview mt-3">
+								<img class="rounded-circle" height="110" width="110" id="file-ip-1-preview" alt="Product image" style="display: none" />
+							</div>
+
+							<label for="file" class="btn btn-dark btn-block btn-lg mt-3" data-mdb-ripple-color="dark">Upload Image</label>
+							<input name="file" type="file" id="file" style="display: none" accept="image/*" onchange="showPreview(event);" />
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-primary">Save/Update Product</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="product-container mt-5">
+			<div class="mx-5">
+				<ul class="nav nav-tabs">
+					<li class="nav-item">
+						<a class="nav-link active" data-bs-toggle="tab" href="#productsTab">Products</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-bs-toggle="tab" href="#packagesTab">Packages</a>
+					</li>
+				</ul>
+
+				<!-- Tab Content -->
+				<div class="tab-content">
+					<!-- Products Tab -->
+					<div id="productsTab" class="tab-pane fade show active">
+						<div class="d-flex justify-content-between align-middle my-3">
+							<h2 class="m-0">Products</h2>
+							<button type="button" id="add-product-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+								Add New Product
+							</button>
+						</div>
+
+						<table id="productTable" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th>Product Image</th>
+									<th>Name</th>
+									<th>UPC Number</th>
+									<th>Package Id</th>
+									<th>Tracking Id</th>
+									<th>Quantity</th>
+									<th>Under Process</th>
+									<th>Owner Username</th>
+									<th>Arrival Date</th>
+									<th>Availability</th>
+									<th>Status</th>
+									<th>Actions</th>
+									<th style="display: none">Product Id</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="productDto : ${products}">
+									<td>
+										<img
+											th:src="@{'data:image/jpeg;base64,'+${productDto.product.generateBase64Image()}}"
+											alt="Product Image"
+											style="max-width: 100px; max-height: 100px"
+											class="product-image"
+										/>
+									</td>
+									<td th:text="${productDto.product.productName}"></td>
+									<td>
+										<a
+											th:href="@{/products/{productId}/history (productId=${productDto.product.id})}"
+											th:text="${productDto.product.upc}"
+											title="View Product History"
+										></a>
+									</td>
+									<td th:text="${productDto.product.packageId}"></td>
+									<td th:text="${productDto.product.trackingId}"></td>
+									<td th:text="${productDto.product.quantity}"></td>
+									<td th:text="${productDto.processingQuantity}"></td>
+									<td th:text="${productDto.product.user.userName}"></td>
+									<td th:text="${productDto.product.arivalDate}"></td>
+									<td th:text="${productDto.product.availability ? 'In Stock' : 'Out Of Stock'}"></td>
+									<td th:text="${productDto.product.active}"></td>
+									<td>
+										<button type="button" class="btn btn-primary btn-sm edit-button">Edit</button>
+										<a th:href="@{'/admin/product-status-update?productId=' + ${productDto.product.id}}">
+											<button type="button" class="btn btn-sm" th:classappend="${productDto.product.active} ? 'btn-danger' : 'btn-success'">
+												<span th:text="${productDto.product.active} ? 'Disable' : 'Enable'">Disable</span>
+											</button>
+										</a>
+									</td>
+									<td th:text="${productDto.product.id}" style="display: none"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div id="packagesTab" class="tab-pane fade">
+					<div class="d-flex justify-content-between align-middle my-3">
+						<h2 class="m-0">Packages</h2>
+					</div>
+
+					<!-- Package Table -->
+					<table id="packageTable" class="table table-striped table-bordered mt-3">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Package ID</th>
+								<th>Arrival Date</th>
+								<th>Owner Username</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="package : ${products}">
+								<td th:text="${package.product.productName}"></td>
+								<td th:text="${package.product.packageId}"></td>
+								<td th:text="${package.product.arivalDate}"></td>
+								<td th:text="${package.product.user.userName}"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="mt-3">
+				<input th:value="${success}" disabled hidden="hidden" id="productAdded" />
+				<input th:value="${message}" disabled hidden="hidden" id="message" />
+			</div>
+		</div>
+
+		<div th:replace="~{fragments/Footer::footer}"></div>
+
+		<script>
+			const editButtons = document.querySelectorAll('.edit-button');
+
+			$(document).ready(function () {
+				$('#productTable').DataTable({ order: [] });
+				$('#packageTable').DataTable({ order: [] });
+			});
+
+			document.addEventListener('DOMContentLoaded', function () {
+				const productAdded = document.getElementById('productAdded').value;
+				if (productAdded != 'null') {
+					var message = document.getElementById('message').value;
+					if (productAdded === 'true') {
+						swal({
+							title: 'Success!',
+							text: message,
+							icon: 'success',
+							button: 'close!',
+						}).then(() => {
+							window.location.href = '/admin/product';
+						});
+					} else {
+						swal({
+							title: 'Failure!',
+							text: message,
+							icon: 'failure',
+							button: 'close!',
+						}).then(() => {
+							window.location.href = '/admin/product';
+						});
+					}
+				}
+
+				const urlParams = new URLSearchParams(window.location.search);
+				if (urlParams.has('checkin')) {
+					document.getElementById('add-product-btn').click();
+				}
+			});
+
+			document.getElementById('add-product-btn').addEventListener('click', function () {
+				document.getElementById('form-heading').innerText = 'Add a new Product';
+
+				// Clear all input fields
+				document.getElementById('name').value = '';
+				document.getElementById('upc').value = '';
+				document.getElementById('packageId').value = '';
+				document.getElementById('trackingId').value = '';
+				document.getElementById('quantity').value = '';
+				document.getElementById('availability').checked = false;
+				document.getElementById('productId').value = '';
+
+				// Reset the image preview
+				var preview = document.getElementById('file-ip-1-preview');
+				preview.src = '';
+				preview.style.display = 'none';
+
+				// Reset the owner dropdown to the first option (or empty)
+				document.getElementById('userId').selectedIndex = 0;
+
+				// Optionally reset the file input field
+				document.getElementById('file').value = '';
+			});
+
+			editButtons.forEach((button) => {
+				button.addEventListener('click', function () {
+					document.getElementById('form-heading').innerText = 'Edit Product';
+					const row = this.closest('tr');
+
+					document.getElementById('name').value = row.querySelector('td:nth-child(2)').textContent.trim();
+					document.getElementById('upc').value = row.querySelector('td:nth-child(3)').textContent.trim();
+					document.getElementById('packageId').value = row.querySelector('td:nth-child(4)').textContent.trim();
+					document.getElementById('trackingId').value = row.querySelector('td:nth-child(5)').textContent.trim();
+					document.getElementById('quantity').value = row.querySelector('td:nth-child(6)').textContent.trim();
+					document.getElementById('availability').checked = row.querySelector('td:nth-child(10)').textContent.trim() === 'In Stock';
+					document.getElementById('productId').value = row.querySelector('td:nth-child(13)').textContent.trim();
+
+					const userText = row.querySelector('td:nth-child(8)').textContent.trim();
+					const select = document.querySelector('#userId');
+					const options = Array.from(select.options);
+					const optionToSelect = options.find((item) => item.text === userText);
+					optionToSelect.selected = true;
+
+					const imageSrc = row.querySelector('.product-image').getAttribute('src');
+					var preview = document.getElementById('file-ip-1-preview');
+					preview.src = imageSrc;
+					preview.style.display = '';
+
+					$('#addProductModal').modal('show');
+				});
+			});
+
+			function showPreview(event) {
+				if (event.target.files.length > 0) {
+					var src = URL.createObjectURL(event.target.files[0]);
+					var preview = document.getElementById('file-ip-1-preview');
+					preview.src = src;
+					preview.style.display = '';
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -21,7 +21,7 @@
                                 <div th:each="currentBill, iterStat : ${currentMonthBills}" class="card mb-3">
                                     <div class="card-header" th:attr="id='heading-' + ${iterStat.index}" style="background-color: #f8f9fa">
                                         <h5 class="mb-0">
-                                            <button class="btn btn-link collapsed text-decoration-none" type="button" data-bs-toggle="collapse" th:attr="data-bs-target='#collapse-' + ${iterStat.index}" th:attr="aria-controls='collapse-' + ${iterStat.index}" aria-expanded="false">
+                                            <button class="btn btn-link collapsed text-decoration-none" type="button" data-bs-toggle="collapse" th:data-bs-target="'#collapse-' + ${iterStat.index}" th:aria-controls="'collapse-' + ${iterStat.index}" aria-expanded="false">
                                                 Billing Period:
                                                 <strong th:text="${#dates.format(currentBill.billStartDate, 'dd MMM')} + ' - ' + ${#dates.format(currentBill.billEndDate, 'dd MMM')}"></strong>
                                                 &nbsp;&nbsp;&nbsp;&nbsp; Warehouse Id:
@@ -30,7 +30,7 @@
                                         </h5>
                                     </div>
 
-                                    <div th:attr="id='collapse-' + ${iterStat.index}" th:attr="aria-labelledby='heading-' + ${iterStat.index}" class="collapse" data-bs-parent="#currentBillsAccordion">
+                                    <div th:attr="id='collapse-' + ${iterStat.index}, aria-labelledby='heading-' + ${iterStat.index}" class="collapse" data-bs-parent="#currentBillsAccordion">
                                         <div class="card-body">
                                             <div class="row">
                                                 <div class="col-md-6">
@@ -49,11 +49,22 @@
                                                 </div>
                                                 <div class="col-md-6 text-end">
                                                     <th:block th:if="${!currentBill.paid}">
-                                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal" th:onclick="'setPaymentBillId(' + ${currentBill.id} + ')'">Pay Now</button>
+                                                        <button type="button" id="heading-[[${currentBill.id}]]"class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal" th:onclick="'setPaymentBillId(' + ${currentBill.id} + ')'">Pay Now</button>
                                                     </th:block>
                                                     <th:block th:if="${currentBill.paid}">
                                                         <h5 class="text-success fw-bold">Payment Complete</h5>
                                                     </th:block>
+                                                    
+                                                    <!-- Print Button -->
+                                                    <button type="button" class="btn btn-secondary"
+                                                            th:attr="data-warehouse-id=${currentBill.warehouseId}, 
+                                                                    data-billing-period=${#dates.format(currentBill.billStartDate, 'dd MMM')} + ' - ' + ${#dates.format(currentBill.billEndDate, 'dd MMM')}, 
+                                                                    data-due-date=${#dates.format(currentBill.dueDate, 'dd MMM yyyy')}, 
+                                                                    data-amount-due=${currentBill.amountDue}, 
+                                                                    data-paid=${currentBill.paid ? 'Yes' : 'No'}"
+                                                            onclick="generatePDF(this)">
+                                                        Print
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -86,7 +97,7 @@
                             <div class="card-body">
                                 <h5 class="text-primary">Billing Cycle:</h5>
                                 <p class="mb-2">
-                                    <span class="text-danger" th:text="${#dates.format(bill.billStartDate, 'dd MMM yyyy')}"></span> -
+                                    <span class="text-danger" th:text="${#dates.format(bill.billStartDate, 'dd MMM yyyy')}"></span> - 
                                     <span class="text-danger" th:text="${#dates.format(bill.billEndDate, 'dd MMM yyyy')}"></span>
                                 </p>
                                 <p class="mb-2">
@@ -147,49 +158,69 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="makePayment()">Pay</button>
+                    <button type="button" class="btn btn-primary" onclick="makePayment1()">Pay</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script th:replace="~{fragments/Scripts::script1}"></script>
-    <script th:replace="~{fragments/Scripts::script2}"></script>
-    <script th:replace="~{fragments/Scripts::script3}"></script>
+	<!-- Include jQuery (latest version) -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<!-- Include jsPDF library (latest version) -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let currentBillId;
+        let selectedBillId;
 
+        // Set the selected bill ID for payment
         function setPaymentBillId(billId) {
-            currentBillId = billId; // Set the current bill ID when the user clicks "Pay Now"
+            selectedBillId = billId;
         }
 
-        function makePayment() {
-            // Get form values
-            const cardNumber = document.getElementById('cardNumber').value;
-            const cardExpiry = document.getElementById('cardExpiry').value;
-            const cardCVC = document.getElementById('cardCVC').value;
+		function makePayment1() {
+			$('#paymentModal').modal('hide');
+			console.log(makePayment(selectedBillId));
+			makePayment(selectedBillId);
+			
+			
+		    const cardNumber = document.getElementById("cardNumber").value;
+		    const cardExpiry = document.getElementById("cardExpiry").value;
+		    const cardCVC = document.getElementById("cardCVC").value;
 
-            if (cardNumber && cardExpiry && cardCVC) {
-                console.log(`Processing payment for bill ID: ${currentBillId}`);
-                console.log(`Card Details: ${cardNumber}, Expiry: ${cardExpiry}, CVC: ${cardCVC}`);
+		    
 
-                // Here you would typically make an AJAX call to your backend to process the payment
+		            // Close modal
+		//$('#paymentModal').modal('hide');
+		            //alert("Payment successful!");
 
-                // Close the modal after payment processing
-                const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
-                modal.hide();
+		            // Optionally, reload the page or refresh the billing data dynamically.
+		            //location.reload();
+		        
+		}
 
-                // Reset form
-                document.getElementById('paymentForm').reset();
-                alert('Payment processed successfully!'); // Provide user feedback
-            } else {
-                alert('Please fill in all fields.');
-            }
+
+
+        // Generate PDF function
+        function generatePDF(button) {
+			const { jsPDF } = window.jspdf; 
+            const warehouseId = button.getAttribute("data-warehouse-id");
+            const billingPeriod = button.getAttribute("data-billing-period");
+            const dueDate = button.getAttribute("data-due-date");
+            const amountDue = button.getAttribute("data-amount-due");
+            const paidStatus = button.getAttribute("data-paid");
+
+            const doc = new jsPDF();
+            doc.text(`Warehouse Id: ${warehouseId}`, 10, 10);
+            doc.text(`Billing Period: ${billingPeriod}`, 10, 20);
+            doc.text(`Due Date: ${dueDate}`, 10, 30);
+            doc.text(`Amount Due: ${amountDue}`, 10, 40);
+            doc.text(`Paid: ${paidStatus}`, 10, 50);
+            doc.save(`Bill-${warehouseId}.pdf`);
         }
     </script>
-
 </body>
 
 </html>

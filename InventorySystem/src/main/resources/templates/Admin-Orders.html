@@ -4,7 +4,6 @@
 	<body>
 		<div th:replace="~{fragments/Navbar::admin-navbar}"></div>
 		<script th:replace="~{fragments/Scripts::script1}"></script>
-		<script th:replace="~{fragments/Scripts::script2}"></script>
 
 		<div class="container card-container my-5">
 			<div class="card" style="border-radius: 15px">
@@ -73,6 +72,10 @@
 											<span class="text-muted">Product Name:</span> <strong th:text="${order.getProduct().getProductName()}"></strong>
 										</p>
 										<p class="mb-2"><span class="text-muted">Quantity:</span> <strong th:text="${order.getQuantity()}"></strong></p>
+										<p class="mb-0">
+																					<span class="text-muted">Shipping Label:</span>
+																					<strong><a th:href="@{/shippingLabel/{orderId} (orderId=${order.id})}" target="_blank"> Download </a></strong>
+																				</p>
 										<p class="mb-0"><a class="text-secondary" th:href="@{/orders/{orderId}/history (orderId=${order.id})}">View Order History</a></p>
 									</div>
 

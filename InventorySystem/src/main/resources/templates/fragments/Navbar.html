@@ -25,7 +25,10 @@
 						<a class="nav-link" th:href="@{/billing/history}">Billings</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/chat}"> Online Chat </a>
+						<a id="chatLink" class="nav-link" th:href="@{/chat}">
+							Online Chat
+							<i id="chatStatusIcon" class="fa fa-circle" style="color: grey"></i>
+						</a>
 					</li>
 				</ul>
 				<ul class="navbar-nav ms-auto">
@@ -72,10 +75,13 @@
 						<a class="nav-link" aria-current="page" th:href="@{/admin/product?checkin=true}">Check In Products</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/admin/get-orders}"> Shipping History  </a>
+						<a class="nav-link" th:href="@{/admin/get-orders}"> Shipping History </a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/admin/chat}"> Online Chat </a>
+						<a id="chatLink" class="nav-link" th:href="@{/admin/chat}">
+							Online Chat
+							<i id="chatStatusIcon" class="fa fa-circle" style="color: grey"></i>
+						</a>
 					</li>
 				</ul>
 				<ul class="navbar-nav ms-auto">

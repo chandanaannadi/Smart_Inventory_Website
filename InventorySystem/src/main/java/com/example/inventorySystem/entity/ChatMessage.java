@@ -31,4 +31,6 @@ public class ChatMessage {
 
     private String content;
     private Timestamp timestamp;
+    
+    private Boolean seen;
 }

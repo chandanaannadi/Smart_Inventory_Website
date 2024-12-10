@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			button: 'close!',
 		});
 	}
+
+	checkUnreadMessages();
 });
 
 function showPreview(event) {
@@ -56,48 +58,47 @@ function cancelOrder(orderId) {
 }
 
 function makePayment(billId) {
-	swal({
-		title: 'Confirm Payment',
-		text: 'Are you sure you want to make the payment for this billing cycle?',
-		icon: 'warning',
-		buttons: {
-			cancel: true,
-			confirm: {
-				text: 'Yes, pay now!',
-				value: true,
-				visible: true,
-				className: 'btn btn-primary',
-				closeModal: true,
-			},
-		},
-	}).then((willPay) => {
-		if (willPay) {
-			fetch('/billing/pay', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ billId: billId }),
-			})
-				.then((response) => {
-					if (response.ok) {
-						return response.text();
-					} else {
-						throw new Error('Network response was not ok.');
-					}
-				})
-				.then((success) => {
-					if (success === 'true') {
-						swal('Payment Successful!', 'Your payment has been processed.', 'success').then(() => {
-							window.location.reload();
-						});
-					} else {
-						swal('Payment Failed!', 'No unpaid bill found or payment already made.', 'error');
-					}
-				})
-				.catch((error) => {
-					swal('Payment Failed!', 'There was an error processing your payment. Please try again.', 'error');
-				});
-		}
-	});
+    // Directly call the API without the confirmation dialog
+    fetch('/billing/pay', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ billId: billId }),
+    })
+    .then((response) => {
+        if (response.ok) {
+            return response.text();
+        } else {
+            throw new Error('Network response was not ok.');
+        }
+    })
+    .then((success) => {
+        if (success === 'true') {
+            // Optionally show a message or reload the page
+            alert('Payment Successful! Your payment has been processed.');
+           // window.location.reload();
+        } else {
+            alert('Payment Failed! No unpaid bill found or payment already made.');
+        }
+    })
+    .catch((error) => {
+        alert('Payment Failed! There was an error processing your payment. Please try again.');
+    });
+}
+
+async function checkUnreadMessages() {
+	const response = await fetch('/messages/unread-status');
+	if (!response.ok) {
+		console.error(`Error fetching unread message status: ${response.statusText}`);
+		return;
+	}
+	const hasUnreadMessages = await response.json();
+
+	const chatStatusIcon = document.getElementById('chatStatusIcon');
+	if (hasUnreadMessages) {
+		chatStatusIcon.style.color = 'green';
+	} else {
+		chatStatusIcon.style.color = 'grey';
+	}
 }

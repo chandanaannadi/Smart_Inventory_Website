@@ -208,6 +208,7 @@ async function onMessageReceived(payload) {
 		}
 	}
 	findAndDisplayUsers();
+	//window.location.reload();
 }
 
 function onLogout() {

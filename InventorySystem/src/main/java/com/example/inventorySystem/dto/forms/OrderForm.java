@@ -8,5 +8,4 @@ public class OrderForm {
 	private String name;
 	private Long warehouseId;
     private Integer quantity;
-    private String orderDate;
 }

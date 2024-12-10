@@ -11,6 +11,5 @@ public class ProductForm {
     private String trackingId;
     private String packageId;
     private Integer quantity;
-    private String arivalDate;
     private String availability;
 }

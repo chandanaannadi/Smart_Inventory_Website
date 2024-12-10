@@ -7,6 +7,7 @@ public class UserProfileForm {
 
     private Long id;
     private String name;
+    private String email;
     private String phoneNumber;
     private String currentPassword;
     private String newPassword;
